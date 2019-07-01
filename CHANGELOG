@@ -1,3 +1,7 @@
+1.0.1 (2019-07-03)
+
+        * Improve the error handling and resulting error reporting for the -g | --gen option.
+
 1.0 (2019-06-30)
 
         * First public release to Github.
