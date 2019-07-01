@@ -21,3 +21,42 @@
 #      This file is the script for Travis CI hosted, distributed continuous 
 #      integration 'before_install' trigger of the 'install' step.
 #
+
+#
+# installdeps <dependency tag>
+#
+# Abstraction for handling common dependency fulfillment across
+# different, but related, test targets.
+#
+installdeps()
+{
+    case "${1}" in
+
+        protoc-deps)
+            sudo contrib/download_protoc.sh
+
+            ;;
+
+    esac
+}
+
+# Package build machine OS-specific configuration and setup
+
+case "${TRAVIS_OS_NAME}" in
+
+    linux)
+        installdeps "protoc-deps"
+
+        sudo apt-get update
+        sudo apt-get install python2.7 python-pip python-virtualenv
+
+        ;;
+
+    osx)
+        installdeps "protoc-deps"
+
+        easy_install pip virtualenv
+
+        ;;
+
+esac

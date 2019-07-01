@@ -1011,8 +1011,12 @@ dist srcdist: | announce-version
 srcdist: dist
 
 $(RESULTSDIR)/$(WDLC_CODEGENDIR)/%: codegen/% | $(RESULTSDIR)/$(WDLC_CODEGENDIR)
+	$(NL_V_AT)if [ ! -d "$(@D)" ]; then \
+	    $(_NL_PROGRESS) "MKDIR" "$(@D)"; \
+	    $(MKDIR_P) "$(@D)"; \
+	fi
 	$(NL_V_PROGRESS) "COPY" "$(@)"
-	$(NL_V_AT)install -D -m 0444 "$(<)" "$(@)"
+	$(NL_V_AT)$(INSTALL) -m 0444 "$(<)" "$(@)"
 
 .PHONY: $(PACKAGE)
 $(PACKAGE): all
