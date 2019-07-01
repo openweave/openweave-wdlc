@@ -1,0 +1,24 @@
+/*
+ *
+ * TestZIface
+ *
+ */
+syntax = "proto3";
+package nest.test.iface;
+
+option objc_class_prefix = "SCM";
+
+import "nest/test/trait/test_z_trait.proto";
+import "wdl/wdl_options.proto";
+
+message TestZIface {
+    option (wdl.message_type) = IFACE;
+    option (wdl.iface) = {
+        stability: ALPHA,
+        vendor_id: NEST,
+        version: 2
+    };
+
+    // Trait
+    nest.test.trait.TestZTrait trait_one = 1;
+}

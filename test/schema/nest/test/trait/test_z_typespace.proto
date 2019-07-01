@@ -1,0 +1,40 @@
+/*
+ *
+ * TestZTypespace
+ *
+ */
+syntax = "proto3";
+package nest.test.trait;
+
+option objc_class_prefix = "SCM";
+
+import "wdl/wdl_options.proto";
+
+message TestZTypespace {
+    option (wdl.message_type) = TYPESPACE;
+    option (wdl.typespace) = {
+        stability: ALPHA,
+        vendor_id: NEST,
+        version: 2,
+    };
+
+    // ---------- ENUMS ---------- //
+
+    enum TestZExternalEnum {
+        TEST_Z_EXTERNAL_ENUM_UNSPECIFIED = 0;
+        TEST_Z_EXTERNAL_ENUM_VALUE_1 = 1;
+        TEST_Z_EXTERNAL_ENUM_VALUE_2 = 2;
+        TEST_Z_EXTERNAL_ENUM_VALUE_3 = 3;
+
+        // Values begins with number
+        TEST_Z_EXTERNAL_ENUM_4 = 4;
+    }
+
+    // ---------- STRUCTS ---------- //
+
+    message TestZExternalStruct {
+        option (wdl.message_type) = STRUCT;
+
+        bool bool = 1;
+    }
+}

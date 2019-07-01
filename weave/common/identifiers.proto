@@ -1,0 +1,215 @@
+/*
+ *
+ *    Copyright (c) 2019 Google LLC.
+ *    Copyright (c) 2016-2018 Nest Labs, Inc.
+ *    All rights reserved.
+ *
+ *    Licensed under the Apache License, Version 2.0 (the "License");
+ *    you may not use this file except in compliance with the License.
+ *    You may obtain a copy of the License at
+ *
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *    Unless required by applicable law or agreed to in writing, software
+ *    distributed under the License is distributed on an "AS IS" BASIS,
+ *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *    See the License for the specific language governing permissions and
+ *    limitations under the License.
+ */
+
+/**
+ *    @file
+ *      This file defines common Weave Data Language (WDL) types for
+ *      events, interfaces, resources, and traits.
+ *
+ */
+
+syntax = "proto3";
+package weave.common;
+
+option java_outer_classname = "WeaveInternalIdentifiers";
+option objc_class_prefix = "SCM";
+
+import "wdl/data_access.proto";
+import "wdl/wdl_options.proto";
+
+/**
+ * If you add a common type here you probably want to add it to:
+ * backend/lib/nwv/nwv_parser.py#link_common_types
+ */
+
+/**
+ *
+ *  A resource ID is normally used for addressing resources in the system, 
+ *  however they also appear occasionally in the data model.  A resource_id 
+ *  is comprised of an 8 byte object_id and a 2 byte type.  The protobuf 
+ *  encoding of a resource ID is a typedef to a string, of the format 
+ *  TYPENAME_objectid.  The TYPENAME comes from the ResourceType.
+ *
+ *  The object_id is the 64-bit integer zero-padded and base-16 encoded 
+ *  into an upper-case string.  So, a valid resource_id would look like:
+ *
+ *    "USER_0123456789ABCDEF"
+ *
+ *  In most cases, the type of the resource_id is statically known when 
+ *  the model is defined.  In this case, an option "resource_type" is 
+ *  set with the above enum value:
+ *
+ *    ResourceId user_id = 3 [(wdl.prop) = {resource_type: RESOURCE_TYPE_USER}];
+ *
+ *  When this is true, the TLV encoding is an 8 byte unsigned integer 
+ *  that contains the object id.  The type is implicit in the schema.  
+ *  If the type does not match the schema specification, or the string 
+ *  format is not valid, an error must be returned to the caller.  When 
+ *  converting from TLV to proto, the string format including the type 
+ *  is recreated.  
+ *
+ *  If "resource_type" is not specified, the TLV encoding is a byte string 
+ *  with a length of 10.  The first two bytes are the type tag from the 
+ *  enum, and the remaining 8 bytes are the object_id encoded in 
+ *  little-endian order.  If the type does not match a known type or the 
+ *  string format is not valid, an error must be returned to the caller.  
+ *  The above id would thus be encoded as:
+ *
+ *    00 02 ef cd ab 89 67 45 23 01
+ *
+ *  In both cases, as the resource_id is a typedef the surrounding 
+ *  structure is flattened away and the context tag of the resource_id 
+ *  instance is used. 
+ */
+message ResourceId {
+  option (wdl.message_type) = TYPEDEF;
+
+  string resource_id = 1 [(wdl.prop) = {string_constraints: {max_length: 32, min_length: 18}}];
+}
+
+/**
+ *  A ResourceName is the canonical, hierarchical string identifying a
+ *  resource class.  This includes the vendor prefix:
+ *
+ *  weave.trait.power.BatteryPowerSourceTrait
+ *  
+ *  There is currently no integer id assigned to resources, so there is no
+ *  separate low-power TLV encoding.  TBD when when a device 
+ *  needs to access a resource class in the model.
+ */
+message ResourceName {
+  option (wdl.message_type) = TYPEDEF;
+
+  string resource_name = 1 [(wdl.prop) = {string_constraints: {max_length: 128}}];  
+}
+
+/**
+ *  Identifies a trait type, which is comprised of a 2 byte vendor id
+ *  and a two byte trait id packed into a 4 byte value.
+ */
+message TraitTypeId {
+  option (wdl.message_type) = TYPEDEF;
+
+  uint32 trait_type_id = 1;
+}
+
+/**
+ *  Identifies a particular instance of a given trait type within a
+ *  resource.  In the common case where there is only a single trait
+ *  instance of a given type in a resource, the instance id of 0 can be
+ *  implied.
+ *
+ *  TraitTypeInstance should not be used directly in trait definitions, 
+ *  instead TraitInstanceId which includes both possible encodings of a 
+ *  trait instance should be used.
+ */
+message TraitTypeInstance {
+
+  TraitTypeId trait_type_id = 1;
+
+  /**
+   *  The optional instance id of this trait instance, if required for
+   *  uniqueness within the resource.  If not specified, the default
+   *  value is 0.
+   */
+  uint32 instance_id = 2 [(wdl.prop) = {optional: true}];
+}
+
+/**
+ *  A trait instance with both possible encodings of
+ *  an instance of a trait.  This does not include the actual resource
+ *  this trait instance is part of.
+ *
+ *  The two encodings are:
+ *    - TraitTypeInstance, which is the trait type id plus the instance id.
+ *      This is used in low-power encodings such as TLV
+ *
+ *    - trait instance label, which is the label of the trait within the
+ *      resource.  This is used in Weave Web API gRPC encodings
+ *
+ *  Only one of the encodings is used at a time, and translators are
+ *  responsible for providing the correct encoding.
+ */
+message TraitInstanceId {
+  option (wdl.message_type) = UNION;
+
+  oneof trait_instance {
+    /// The label of this trait instance within the resource definition
+    string trait_instance_label = 1;
+
+    /// The global type id of this trait, vendor id + trait id
+    TraitTypeInstance trait_instance_id = 2;
+  }
+}
+
+/**
+ *  A fully specified trait, including a resource id and a trait id.
+ *  This must always include a "resource_type" annotation as the type 
+ *  of the resource must be known to reference a given trait instance.
+ */
+message FullTraitInstanceId {
+
+  ResourceId resource_id = 1;
+
+  TraitInstanceId trait_instance_id = 2;
+
+}
+
+/**
+ *  An InterfaceName is the canonical, hierarchical string identifying a
+ *  interface.  This includes the vendor prefix:
+ *
+ *  weave.iface.common.DeviceIface
+ *  
+ *  There is currently no integer id assigned to interfaces, so there is no
+ *  separate low-power TLV encoding.  TBD when when a device 
+ *  needs to access a interface in the model.
+ */
+message InterfaceName {
+  option (wdl.message_type) = TYPEDEF;
+
+  string interface_name = 1 [(wdl.prop) = {string_constraints: {max_length: 128}}];  
+}
+
+/**
+ *  Defines a tuple of (resource_id, importance, 64-bit ID) that together
+ *  represents a Phoenix Event ID. resource_id refers to the producer of the
+ *  event.
+ *
+ *  If resource_id is nullified, it refers to an event associated with the same
+ *  producer as that of the parent trait/event within which this is instantiated.
+ */
+message EventId {
+  ResourceId resource_id = 1 [(wdl.prop) = {nullable: true}];
+  wdl.EventImportance importance = 2;
+  uint64 id = 3;
+}
+
+/**
+ *  This defines a type to encapsulate profile-specific status codes. This includes both 
+ *  a 32-bit Profile ID and a 16-bit status code.
+ *
+ *  Currently, there isn't well-defined syntax to define these status codes in traits so
+ *  in the absence of that, please define enumerations within the trait/typespace to represent
+ *  that.
+ */
+message ProfileSpecificStatusCode {
+  uint32 profile_id = 1;
+  uint32 status_code = 2 [(wdl.prop) = {uint_constraints: {width: 16}}];
+}

@@ -1,0 +1,76 @@
+/*
+ *
+ * TestTraitA
+ *
+ * This trait exercises a couple of features for code-gen:
+ *  - Enumerant definitions (within multiple name-spaces)
+ *  - Instantiation of multiple basic types
+ *  - Structure type messages
+ *  - IDL standard types
+ *  - Optionality/Nullability
+ */
+
+syntax = "proto3";
+package nest.test.trait;
+
+import "wdl/wdl_options.proto";
+
+option java_outer_classname = "WeaveTestHTrait";
+option objc_class_prefix = "SCM";
+
+
+message TestHTrait {
+    option (wdl.message_type) = TRAIT;
+    option (wdl.trait) = {
+        vendor_id: NEST,
+        id: 0xFE08,
+        version: 1,
+        stability: BETA
+    };
+
+    message StructH {
+        option (wdl.message_type) = STRUCT;
+        option (wdl.structopts) = {
+            extendable: true,
+            reserved_tag_min: 1,
+            reserved_tag_max: 31
+        };
+        map <uint32, StructDictionary> sa = 1;
+        uint32 sb = 2;
+        uint32 sc = 3;
+    }
+
+    message StructDictionary {
+        option (wdl.message_type) = STRUCT;
+        option (wdl.structopts) = {
+            extendable: true,
+            reserved_tag_min: 1,
+            reserved_tag_max: 31
+        };
+        uint32 da = 1;
+        uint32 db = 2;
+        uint32 dc = 3;
+    }
+
+
+    // ----------- PROPERTIES ----------- //
+    option (wdl.properties) = {
+        writable: READ_ONLY,
+        extendable: true,
+        reserved_tag_min: 1,
+        reserved_tag_max: 31
+    };
+
+    uint32 a = 1;
+    uint32 b = 2;
+    uint32 c = 3;
+    uint32 d = 4;
+    uint32 e = 5;
+    uint32 f = 6;
+    uint32 g = 7;
+    uint32 h = 8;
+    uint32 i = 9;
+    uint32 j = 10;
+    StructH k = 11;
+    map <uint32, StructDictionary> l = 12;
+}

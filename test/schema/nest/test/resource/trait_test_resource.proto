@@ -1,0 +1,84 @@
+/*
+ *
+ *    Copyright (c) 2019 Google LLC.
+ *    Copyright (c) 2016-2018 Nest Labs, Inc.
+ *    All rights reserved.
+ *
+ *    Licensed under the Apache License, Version 2.0 (the "License");
+ *    you may not use this file except in compliance with the License.
+ *    You may obtain a copy of the License at
+ *
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *    Unless required by applicable law or agreed to in writing, software
+ *    distributed under the License is distributed on an "AS IS" BASIS,
+ *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *    See the License for the specific language governing permissions and
+ *    limitations under the License.
+ */
+
+/**
+ *    @file
+ *      This file effects a test resource to exercise code generation
+ *      for the Weave Data Language (WDL) resource schema
+ *
+ */
+
+syntax = "proto3";
+
+package nest.test.resource;
+
+import "wdl/wdl_options.proto";
+import "nest/test/trait/test_a_trait.proto";
+import "nest/test/trait/test_b_trait.proto";
+import "nest/test/trait/test_c_trait.proto";
+import "nest/test/trait/test_d_trait.proto";
+import "nest/test/iface/test_basic_iface.proto";
+import "nest/test/iface/test_nested_iface.proto";
+import "nest/test/iface/test_versioned_basic_iface.proto";
+
+option java_outer_classname = "Test1Resource";
+option objc_class_prefix = "SCM";
+
+message TraitTestResource {
+  option (wdl.message_type) = RESOURCE;
+  option (wdl.resource) = {
+    stability: ALPHA,
+    vendor_id: NEST,
+    vendor_product_id: 0xFE00,
+    version: 2,
+    version_map: [
+        {
+            resource_version: 2,
+            trait_version_list: [
+                {name: "nest.test.trait.TestCTrait", version: 2},
+                {name: "nest.test.trait.TestDTrait", version: 2}
+            ],
+            iface_version_list: [
+                {name: "nest.test.iface.TestVersionedBasicIface", version: 2}
+            ]
+        }
+    ]
+  };
+
+  nest.test.trait.TestATrait service_a = 1 [(wdl.traitconfig) = {published_by: EXTERNAL, proxied: false, subscribed: true}];
+  nest.test.trait.TestBTrait service_b = 2 [(wdl.traitconfig) = {published_by: EXTERNAL, proxied: false, subscribed: true}];
+  nest.test.trait.TestCTrait service_c = 3 [(wdl.traitconfig) = {published_by: EXTERNAL, proxied: false, subscribed: true}];
+  nest.test.trait.TestDTrait service_d = 4 [(wdl.traitconfig) = {published_by: EXTERNAL, proxied: false, subscribed: true}];
+
+  nest.test.trait.TestATrait device_a = 5 [(wdl.traitconfig) = {published_by: SELF, proxied: true, subscribed: false}, (wdl.traitinst) = {instance: 1}];
+  nest.test.trait.TestBTrait device_b = 6 [(wdl.traitconfig) = {published_by: SELF, proxied: true, subscribed: false}, (wdl.traitinst) = {instance: 1}];
+  nest.test.trait.TestCTrait device_c = 7 [(wdl.traitconfig) = {published_by: SELF, proxied: true, subscribed: false}, (wdl.traitinst) = {instance: 1}];
+  nest.test.trait.TestDTrait device_d = 8 [(wdl.traitconfig) = {published_by: SELF, proxied: true, subscribed: false}, (wdl.traitinst) = {instance: 1}];
+
+  // For multi-instance testing (e.g commands)
+  nest.test.trait.TestATrait device_a2 = 9 [(wdl.traitconfig) = {published_by: SELF, proxied: true, subscribed: false}, (wdl.traitinst) = {instance: 2}];
+  nest.test.trait.TestATrait device_a3 = 10 [(wdl.traitconfig) = {published_by: SELF, proxied: true, subscribed: false}, (wdl.traitinst) = {instance: 3}];
+
+  message Implements {
+    option (wdl.message_type) = IFACE_IMPLEMENTATIONS;
+    nest.test.iface.TestBasicIface iface_1 = 1;
+    nest.test.iface.TestNestedIface iface_2 = 2 [(wdl.implconfig) = {trait_mapping: [{from:"service_a", to:"trait_x"}]}];
+    nest.test.iface.TestVersionedBasicIface iface_3 = 3 [(wdl.implconfig) = {min_version: 2}];
+  }
+}

@@ -1,0 +1,78 @@
+/*
+ *
+ * TestTraitC
+ *
+ * This trait exercises a couple of features for code-gen:
+ *   - Versioning
+ */
+
+syntax = "proto3";
+package nest.test.trait;
+
+import "google/protobuf/timestamp.proto";
+import "wdl/wdl_options.proto";
+import "nest/test/trait/test_common.proto";
+import "nest/test/trait/test_common_versioned.proto";
+
+option java_outer_classname = "WeaveTestTraitC";
+option objc_class_prefix = "SCM";
+
+message TestCTrait {
+    option (wdl.message_type) = TRAIT;
+
+    option (wdl.trait) = {
+        vendor_id: NEST,
+        id: 0xFE03,
+        version: 2,
+        stability: ALPHA,
+        version_map: [
+          {
+             parent_version: 2, dependent_version_list: [
+               {name: "nest.test.trait.TestCommonVersioned", version: 2}
+             ]
+          }
+        ]
+    };
+
+    message StructC {
+        option (wdl.message_type) = STRUCT;
+        option (wdl.structopts) = {
+            extendable: true,
+            reserved_tag_min: 1,
+            reserved_tag_max: 31
+        };
+
+        uint32 sc_a = 1;
+        bool sc_b = 2;
+
+        // TODO: IDL doesn't support revising structures just yet.
+        //uint32 sc_c = 3 [(wdl.structvalue) = {compatibility: {min_version: 2}}];
+    }
+
+    enum EnumC {
+        option (wdl.enumopts) = {
+            extendable: true ,
+            reserved_tag_min: 1,
+            reserved_tag_max: 32
+        };
+
+        ENUM_C_UNSPECIFIED = 0;
+        ENUM_C_VALUE_1 = 1;
+        ENUM_C_VALUE_2 = 2;
+        ENUM_C_VALUE_3 = 3 [(wdl.enumvalue) = {compatibility: {min_version: 2}}];
+    }
+
+    // ----------- PROPERTIES ----------- //
+    option (wdl.properties) = {
+        writable: READ_ONLY,
+        extendable: true,
+        reserved_tag_min: 1,
+        reserved_tag_max: 31
+    };
+
+    bool tc_a = 1;
+    EnumC tc_b = 2;
+    StructC tc_c = 3;
+    uint32 tc_d = 4 [(wdl.prop) = {compatibility: {min_version: 2}}];
+    TestCommonVersioned.CommonEnumE tc_e = 5;
+}

@@ -1,0 +1,60 @@
+/*
+ *
+ *    Copyright (c) 2019 Google LLC.
+ *    Copyright (c) 2016-2018 Nest Labs, Inc.
+ *    All rights reserved.
+ *
+ *    Licensed under the Apache License, Version 2.0 (the "License");
+ *    you may not use this file except in compliance with the License.
+ *    You may obtain a copy of the License at
+ *
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *    Unless required by applicable law or agreed to in writing, software
+ *    distributed under the License is distributed on an "AS IS" BASIS,
+ *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *    See the License for the specific language governing permissions and
+ *    limitations under the License.
+ */
+
+/**
+ *    @file
+ *      This file defines common Weave Data Language (WDL) unitary
+ *      quantity enumerations.
+ *
+ */
+
+syntax = "proto3";
+package weave.common;
+
+option java_outer_classname = "WeaveInternalUnits";
+option objc_class_prefix = "SCM";
+
+// TODO TVD doc 
+
+enum QuantityType {
+  QUANTITY_TYPE_UNSPECIFIED = 0X0000;
+  LENGTH                    = 0X0001; /// meters
+  MASS                      = 0X0002; /// kg
+  DURATION                  = 0X0003; /// seconds
+  CURRENT                   = 0X0004; /// A
+  TEMPERATURE               = 0X0005; /// degrees C
+  LUMINOUS_INTENSITY        = 0X0006; /// cd
+  AREA                      = 0X0007; /// m^2
+  VOLUME                    = 0X0008; /// m^3
+  VELOCITY                  = 0X0009; /// m/s
+  ACCELERATION              = 0X000A; /// m/s^2
+  FREQUENCY                 = 0x001B; /// Hz
+  ENERGY                    = 0x001E; /// W
+  ELECTRIC_CHARGE           = 0x0020; /// Ah
+  VOLTAGE                   = 0x0021; /// V
+  RESISTANCE                = 0x0022; /// ohms
+  MAGNETIC_FLUX_DENSITY     = 0X0026; /// T (Wb/m^2)
+  ILLUMINANCE               = 0X002A; /// lux
+  HUMIDITY                  = 0X002E; /// %
+  DBM                       = 0x002F; /// dBm
+  PPM                       = 0x0030; /// ppm
+  PIRMEASUREMENT            = 0X0100;
+  NORMALIZED                = 0x0101;
+  // VOLUME                    = 0x0102;
+}

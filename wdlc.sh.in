@@ -1,0 +1,650 @@
+#!/bin/bash -e
+
+#
+#    Copyright (c) 2019 Google LLC. All Rights Reserved.
+#    Copyright (c) 2016-2018 Nest Labs Inc. All Rights Reserved.
+#
+#    Licensed under the Apache License, Version 2.0 (the "License");
+#    you may not use this file except in compliance with the License.
+#    You may obtain a copy of the License at
+#
+#        http://www.apache.org/licenses/LICENSE-2.0
+#
+#    Unless required by applicable law or agreed to in writing, software
+#    distributed under the License is distributed on an "AS IS" BASIS,
+#    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#    See the License for the specific language governing permissions and
+#    limitations under the License.
+#
+
+##
+#  @file
+#     This file is the Weave Data Language (WDL) Compiler (WDLC) front-end.
+#
+
+#
+# usage <exit status> <wdlc data directory>
+#
+# Display program usage.
+#
+function usage() {
+    local name=`basename ${0}`
+    local datadir="${2}"
+
+    echo "Usage: `basename ${0}` [ option ... ] { descriptor binary | input directory | input file ... }"
+
+    if [ ${1} -ne 0 ]; then
+        echo "Try '${name} -h' for more information."
+    fi
+
+    if [ ${1} -ne 1 ]; then
+        local template_names="`ls -1 ${datadir}/codegen 2> /dev/null | xargs`"
+
+        echo "Weave Data Language (WDL) Compiler (WDLC)"
+        echo ""
+        echo "Options:"
+        echo ""
+        echo "  -c, --check                          Validate schema against WDL rules."
+        echo "  -d, --gen-dependencies               Generate code for dependencies outside"
+        echo "                                       and in addition to those schema files in"
+        echo "                                       in or under the provided input"
+        echo "                                       directories or files."
+        if [ -n "${template_names}" ]; then
+            echo "  -g, --gen NAME | DIR                 Validate schema against WDL rules and"
+            echo "                                       generate code given a set of named"
+            echo "                                       templates from name NAME or templates"
+            echo "                                       from directory DIR. Supported NAME"
+            echo "                                       values are:"
+            echo ""
+            for template in ${template_names} ; do
+                echo "                                           - ${template}"
+            done
+            echo ""
+        else
+            echo "  -g, --gen DIR                        Validate schema against WDL rules and"
+            echo "                                       generate code given a set of templates"
+            echo "                                       from directory DIR."
+        fi
+        echo "  -f, --input-format FORMAT            Format of the input being passed in,"
+        echo "                                       specified in FORMAT. Supported FORMAT"
+        echo "                                       values are (default: source):"
+        echo ""
+        echo "                                           - intermediate"
+        echo "                                           - source"
+        echo ""
+        echo "  -p, --previous-intermediate-in FILE  Optionally pass in a path to an "
+        echo "                                       intermediate binary specified in FILE"
+        echo "                                       that is generated from a compile of a "
+        echo "                                       previously versioned schema body. This"
+        echo "                                       is used to enforce additional WDL "
+        echo "                                       versioning rules during checking"
+        echo "  -h, --help                           Display this help, then exit."
+        echo "  -I, -i, --include-schema-path DIR    Use the source schema in the directory"
+        echo "                                       DIR."
+        echo "  -n, --dry-run                        Do not actually validate or code-generate"
+        echo "                                       any schema; just print what would happen."
+        echo "  --output-intermediate FILE           Use FILE as the output path to an "
+        echo "                                       intermediate representation of the input"
+        echo "                                       schema that can be used in place of "
+        echo "                                       schema in a future invocation, or used "
+        echo "                                       for version validation using the"
+        echo "                                       --previous-intermediate-in option."
+        echo "  -o, --output DIR                     Generate code to the output directory"
+        echo "  -q, --quiet                          Work silently; do not display diagnostic"
+        echo "                                       and progress output unless an error"
+        echo "                                       occurs."
+        echo "  -t, --add-test                       Add the test traits as well to the input"
+        echo "                                       schema set."
+        echo "  -v, --verbose                        Work verbosely; increase the level of"
+        echo "                                       diagnostic and progress output."
+        echo "  --version                            Display version information then exit."
+        echo "  --wdlcroot DIR                       Use the directory DIR as the logical"
+        echo "                                       root directory for WDLC (default: ${WDLCROOT})"
+    fi
+
+    exit ${1}
+}
+
+# version
+#
+# Display version information.
+#
+function version() {
+    echo "wdlc @WDLC_VERSION@"
+    echo "Copyright (c) 2019 Google LLC."
+    echo "Copyright (c) 2016-2018 Nest Labs, Inc."
+}
+
+#
+# check_required_executable <path variable> <executable name>
+#
+# Check to ensure that the named executable with the path in the
+# provided variable exists and is executable by the current user.
+#
+function check_required_executable() {
+    local variable="${1}"
+    local maybe_fully_qualified_path="${!variable}"
+    local fully_qualified_path="$(which ${maybe_fully_qualified_path})"
+    local name="${2}"
+    local stem="The required executable '${name}' at '${maybe_fully_qualified_path}'"
+
+    if [ ! -e "${fully_qualified_path}" ] || [ ! -x "${fully_qualified_path}" ]; then
+        if [ ! -e ${fully_qualified_path} ]; then
+            echo "${stem} does not exist."
+        elif [ ! -x ${fully_qualified_path} ]; then
+            echo "${stem} is not executable."
+        fi
+
+        echo "Please ensure '${name}' is available in PATH." >&2
+
+        exit 1
+    fi
+}
+
+#
+# error_on_exclusive_options <first option> <second option>
+#
+# Displays a message to standard output indicating that the specified
+# option arguments are mutually- exclusive and that one or the other
+# should be chosen. The program then exits with error status.
+#
+function error_on_exclusive_options() {
+    local first_option="${1}"
+    local second_option="${2}"
+
+    echo "The ${first_option} and ${second_option} options are mutually-exclusive. Please pick one or the other."
+
+    exit 1
+}
+
+#
+# verbose_progress <...>
+#
+# If the verbose level is greater than zero (i.e., no quiet), the
+# specified arguments, representing program progress, are displayed to
+# standard output.
+#
+function verbose_progress() {
+    if [ ${verbose} -gt 0 ]; then
+        echo "${*}"
+    fi
+}
+
+#
+# display_dry_run <command> [ argument ... ]
+#
+# The specified command and arguments are displayed to standard output
+# specified arguments, representing program progress, are displayed to
+# standard output.
+#
+function display_dry_run() {
+    echo "${*}"
+}
+
+#
+# maybe_run_or_dry_run <command> [ argument ... ]
+#
+# If the program has been invoked in dry-run mode, the specified
+# command and argument are displayed to standard output. Otherwise,
+# the command and arguments are executed.
+#
+function maybe_run_or_dry_run() {
+    if [ ${should_dry_run} -eq 1 ]; then
+        display_dry_run ${*}
+    else
+        ${*}
+    fi
+}
+
+#
+# gwvc_check_schema <protobuf file set descriptor binary output path>
+#
+# Maybe drive, if not dry-running, the GWVC back-end to validate the schema
+# corpus in the specified protobuf file set descriptor binary.
+#
+#
+function gwvc_check_schema() {
+    local descriptor_set_path="${1}"
+    local command="${GWVC} \
+        ${gwvc_passthrough_options} \
+        check \
+        --proto_descriptor ${descriptor_set_path}"
+
+    maybe_run_or_dry_run ${command}
+}
+
+function gwvc_compare_schema_versions() {
+    local previous_descriptor_set_path="${1}"
+    local current_descriptor_set_path="${2}"
+    local command="${GWVC} \
+        ${gwvc_passthrough_options} \
+        compare \
+        --previous_proto_descriptor ${previous_proto_descriptor_set_path} \
+        --proto_descriptor ${current_descriptor_set_path}"
+
+    maybe_run_or_dry_run ${command}
+}
+
+#
+# protoc_generate_proto_descriptor_set <protobuf file set descriptor binary output path>
+#
+# Maybe drive, if not dry-running, protoc to generate the specified
+# protobuf file set descriptor binary output path.
+#
+function protoc_generate_proto_descriptor_set() {
+    local descriptor_set_path="${1}"
+    local command="${PROTOC} \
+        --include_source_info \
+        --include_imports \
+        ${protoc_search_path_options} \
+        --descriptor_set_out=${descriptor_set_path} \
+        ${input_paths}"
+
+    # Generate, if not dry-running, the protobuf file set descriptor
+    # binary.
+
+    maybe_run_or_dry_run ${command}
+}
+
+#
+# remove_proto_descriptor_set <protobuf file set descriptor binary output path>
+#
+# Maybe remove, if not dry-running, the specified protobuf
+# file set descriptor binary output path.
+#
+function remove_proto_descriptor_set() {
+    local descriptor_set_path="${1}"
+    local command="rm -f ${descriptor_set_path}"
+
+    maybe_run_or_dry_run ${command}
+}
+
+#
+# protoc_generate_code <template directory> <output directory>
+#
+# Maybe drive, if not dry-running, protoc to perform code generation.
+#
+# This will find all of the template files that are not Emacs
+# temporary files in the specified template directory and will pass
+# them to the WDL plugin as a colon-separated list as the
+# '-wdl_opt=templates=<...>' sub-option.
+#
+function protoc_generate_code() {
+    local template_dir="${1}"
+    local template_files=$(find ${template_dir}/* ! -name "*~" | tr '\n' ':' | sed 's/:$//')
+    local output_directory="${2}"
+    local command="${PROTOC} \
+        --plugin=protoc-gen-wdl=${wdlc_libdir}/wdl_plugin \
+        --wdl_opt=templates=${template_files},legacy_mode_enabled=true,gen_dependencies=${gen_dependencies},codegen_reference_mode=${codegen_reference_mode} \
+        --wdl_out=${output_directory} \
+        ${protoc_search_path_options} \
+        ${input_paths}"
+
+    # Generate, if not dry-running, the code.
+
+    maybe_run_or_dry_run ${command}
+}
+
+#
+# check_directory_or_exit <directory variable> <directory description>
+#
+# Check, if not dry-running, whether the directory referenced by the
+# specified variable exists. If it does not, display a descriptive
+# error message and exit with error status.
+#
+function check_directory_or_exit() {
+    local variable="${1}"
+    local directory="${!variable}"
+    local description="${2}"
+
+    if [ -n "${directory}" ] && [ ! -d "${directory}" ] && [ ${should_dry_run} -eq 0 ]; then
+        echo "The required ${description} directory '${directory}' does not exist." >&2
+
+        exit 1
+    fi
+}
+
+#
+# calculate_wdlcroot
+#
+# Dynamically determine, based on the command this was invoked with,
+# what the correct value of WDLCROOT is.
+#
+# WDLC may be invoked directly via its executable or via its symbolic
+# link, flexibly and correctly handle either case.
+#
+function calculate_wdlcroot() {
+    local realpath
+
+    if [ -h "${0}" ]; then
+        realpath="$(dirname ${0})/$(readlink ${0})"
+    else
+        realpath="${0}"
+    fi
+
+    echo "$(cd "$(dirname "${realpath}")" > /dev/null && pwd)/../.."
+}
+
+#
+# Option-independent Global Variables
+#
+# These are global variables that may themselves be affected by option
+# parsing by have no dependencies on other global variables that, in
+# turn, may be affected by option parsing.
+#
+
+WDLCROOT="`calculate_wdlcroot`"
+export WDLCROOT
+
+add_test_traits=0
+codegen_reference_mode=false
+gen_dependencies=false
+gwvc_passthrough_options=""
+input_paths=""
+previous_intermediate_in=""
+input_format="source"
+mode="unknown"
+mode_option=""
+output_dir="."
+intermediate_output_path=""
+protoc_search_paths=()
+protoc_search_path_options=""
+should_dry_run=0
+template_dir=""
+template_arg=""
+verbose=0
+
+while [ "${#}" -gt 0 ]; do
+
+    case ${1} in
+
+        -c | --check)
+            if [ ${mode} = "codegen" ]; then
+                error_on_exclusive_options ${mode_option} ${1}
+            fi
+            mode="check"
+            mode_option=${1}
+            shift 1
+            ;;
+
+        -d | --gen-dependencies)
+            gen_dependencies=true
+            shift 1
+            ;;
+
+        -g | --gen)
+            if [ ${mode} = "check" ]; then
+                error_on_exclusive_options ${mode_option} ${1}
+            fi
+            mode="codegen"
+            mode_option=${1}
+            template_arg=${2}
+            shift 2
+            ;;
+
+        -f | --input-format)
+            input_format=${2}
+            shift 2
+            ;;
+
+        -p | --previous-intermediate-in)
+            previous_intermediate_in=${2}
+            shift 2
+            ;;
+
+        -h | --help)
+            usage 0 "${WDLCROOT}/@WDLC_DATADIR@"
+            ;;
+
+        -i | -I | --include-schema-path)
+            protoc_search_paths+=("${2}")
+            shift 2
+            ;;
+
+        -n | --dry-run)
+            should_dry_run=1
+            shift 1
+            ;;
+
+        -o | --output)
+            output_dir=${2}
+            shift 2
+            ;;
+
+        --output-intermediate)
+            intermediate_output_path=${2}
+            shift 2
+            ;;
+
+        -q | --quiet)
+            verbose=0
+            gwvc_passthrough_options+=("${1}")
+            shift 1
+            ;;
+
+        -t | --add-test)
+            add_test_traits=1
+            codegen_reference_mode=true
+            shift 1
+            ;;
+
+        -v | --verbose)
+            ((verbose += 1))
+            gwvc_passthrough_options+=("${1}")
+            shift 1
+            ;;
+
+        --version)
+            version
+            exit 0
+            ;;
+
+        --wdlcroot)
+            WDLCROOT="${2}"
+            export WDLCROOT
+            shift 2
+            ;;
+
+        -*)
+            echo "Unknown or invalid option: '${1}'" >&2
+            usage 1 "${WDLCROOT}/@WDLC_DATADIR@"
+            ;;
+
+        *)
+            # Accumulate input paths (directory or files) by appending
+            # (preserving order priority) subsequent paths as a space-
+            # delimited list.
+
+            input_paths="${input_paths}${input_paths:+ }${1}"
+            shift 1
+            ;;
+
+    esac
+
+done
+
+#
+# Option-dependent Global Variables
+#
+# These are global variables that may be affected by other global
+# variables that may be affected by option parsing and, to simplify
+# their evaluation, get evaluated after option-parsing is complete.
+#
+
+wdlc_bindir="${WDLCROOT}/@WDLC_BINDIR@"
+wdlc_datadir="${WDLCROOT}/@WDLC_DATADIR@"
+wdlc_includedir="${WDLCROOT}/@WDLC_INCLUDEDIR@"
+wdlc_libdir="${WDLCROOT}/@WDLC_LIBDIR@"
+
+# The WDLC front-end, in turn, invokes both 'protoc' and 'gwvc' to
+# perform its back-end work. Define variables to default locations of
+# each of these tools. In the case of protoc, we allow the possibility
+# that a user who knows what they are doing can specify, via the
+# environment, a custom protoc.
+
+GWVC=${wdlc_libdir}/gwvc
+
+if [ -z "${PROTOC}" ]; then
+    PROTOC=protoc
+else
+    echo "note: running protoc, '${PROTOC}', specified from the environment via PROTOC rather than 'protoc'."
+fi
+
+proto_descriptor_set_name="proto-descriptor-set.proto.bin"
+
+current_proto_descriptor_set_path=""
+previous_proto_descriptor_set_path=""
+
+if [ "${input_format}" == "intermediate" ]; then
+    if [ "${add_test_traits}" -eq 1 ]; then
+        echo "Cannot add test traits when using the intermediate input format"
+        usage 1 "${wdlc_datadir}"
+    fi
+
+    if [ -d ${input_paths} ]; then
+        echo "Please provide a valid path to the intermediate input file"
+        usage 1 "${wdlc_datadir}"
+    fi
+
+    if [ "${mode}" == "codegen" ]; then
+        echo "Cannot use the intermediate input format when doing code generation"
+        usage 1 "${wdlc_datadir}"
+    fi
+
+    current_proto_descriptor_set_path="${input_paths}"
+elif [ "${input_format}" == "source" ]; then
+    if [ -n "${intermediate_output_path}" ]; then
+        current_proto_descriptor_set_path="${intermediate_output_path}"
+    else
+        current_proto_descriptor_set_path="${output_dir}/${proto_descriptor_set_name}"
+    fi
+else
+    echo "Invalid input format option"
+    usage 1 "${wdlc_datadir}"
+fi
+
+if [ -d "${intermediate_output_path}" ]; then
+    echo "Please pass in a valid path to a intermediate output file"
+    usage 1 "${wdlc_datadir}"
+fi
+
+protoc_search_path_options="--proto_path ${wdlc_includedir}"
+
+# The template argument for code generation is either a short-cut to a
+# wdlc-internal directory or an absolute or relative path to an
+# external template directory. Attempt to form the former and
+# determine its existence. If it exists, the shortcut is good. If it
+# doesn't exist, then assume it's the latter and the directory check
+# below will flag it if it does not exist.
+
+template_dir="${wdlc_datadir}/codegen/${template_arg}/templates"
+
+if [ ! -d "${template_dir}" ]; then
+    template_dir="${template_arg}"
+fi
+
+# If any of the following directories have been specified but do not
+# exist, it is an outright error, if we are not dry-running:
+#
+#   - output directory
+#   - template directory
+#   - WDLCROOT
+
+check_directory_or_exit output_dir "output"
+check_directory_or_exit template_dir "code generation template"
+check_directory_or_exit WDLCROOT "WDLC root"
+
+# If additional schema search paths have been requested, add them to
+# the list of arguments passed to protoc.
+#
+# If any of the directories does not exist, it is an outright error,
+# if we are not dry-running.
+
+if [ ${#protoc_search_paths[@]} -gt 0 ]; then
+    for protoc_search_path in ${protoc_search_paths[@]}; do
+        check_directory_or_exit protoc_search_path "schema search"
+
+        protoc_search_path_options+=" --proto_path ${protoc_search_path}"
+    done
+fi
+
+# If the input points to a directory, convert it to specify the set of proto files in them instead.
+if [ -d "${input_paths}" ]; then
+    input_paths=$(find ${input_paths} -name *.proto)
+fi
+
+# Validate that the previous input path points to a valid .bin file.
+if [ -n "${previous_intermediate_in}" ]; then
+    if [ ! -f "${previous_intermediate_in}" ]; then
+        echo "Please pass a well-formed path to the intermediate descriptor binary"
+        usage 1 "${wdlc_datadir}"
+    fi
+
+    previous_proto_descriptor_set_path="${previous_intermediate_in}"
+fi
+
+# If the user has requested inclusion of the test traits, then add
+# them to the list of input schema paths to be processed.
+
+if [ ${add_test_traits} -eq 1 ]; then
+    input_paths+=' '$(find ${wdlc_includedir}/nest/test -name "*.proto" ! -name "*test_z*.proto")
+    input_paths+=' '${wdlc_includedir}/weave/common/*.proto
+fi
+
+# If no input paths (directory or files or intermediate file) have been specified, it is a
+# usage invocation error: display usage with error status
+
+if [ -z "${input_paths}" ]; then
+    usage 1 "${wdlc_datadir}"
+fi
+
+# The WDLC front-end, in turn, invokes both 'protoc' and 'gwvc' to
+# perform its back-end work. Ensure, up front, that these two
+# mission-critical executables exist, if we are not dry-running.
+
+if [ ${should_dry_run} -eq 0 ]; then
+    check_required_executable PROTOC ${PROTOC}
+    check_required_executable GWVC gwvc
+fi
+
+# Whether we are checking / validating the schema corpus or running
+# code generation, the coherency and correctness of the schema corpus
+# must be verified first.
+
+if [ ${mode} = "check"  ] || [ ${mode} = "codegen" ]; then
+    verbose_progress "Checking schema..."
+
+    # Drive, if not dry-running, protoc to generate the schema corpus
+    # in the specified protobuf file set descriptor binary.
+
+    if [ "${input_format}" == "source" ]; then
+        protoc_generate_proto_descriptor_set "${current_proto_descriptor_set_path}"
+    fi
+
+    # Drive, if not dry-running, the gwvc back-end to generate
+    # information about the schema corpus in the specified protobuf
+    # file set descriptor binary. This implicitly runs a schema check
+    # in the process.
+
+    gwvc_check_schema "${current_proto_descriptor_set_path}"
+
+    if [ -n "${previous_proto_descriptor_set_path}" ]; then
+        gwvc_check_schema "${previous_proto_descriptor_set_path}"
+        gwvc_compare_schema_versions "${previous_proto_descriptor_set_path}" "${current_proto_descriptor_set_path}"
+    fi
+
+    # Remove, if not dry-running, the previously-generated protobuf file
+    # set descriptor binary.
+
+    if [ ! -n "${intermediate_output_path}" ] && [ "${input_format}" != "intermediate" ]; then
+        remove_proto_descriptor_set "${current_proto_descriptor_set_path}"
+    fi
+fi
+
+# Generate the code in to the code generation output directory.
+
+if [ ${mode} = "codegen" ]; then
+    verbose_progress "Generating code from templates in \"${template_arg}\" to \"${output_dir}\"..."
+
+    protoc_generate_code "${template_dir}" "${output_dir}"
+fi

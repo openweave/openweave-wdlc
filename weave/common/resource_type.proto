@@ -1,0 +1,60 @@
+/*
+ *
+ *    Copyright (c) 2019 Google LLC.
+ *    Copyright (c) 2016-2018 Nest Labs, Inc.
+ *    All rights reserved.
+ *
+ *    Licensed under the Apache License, Version 2.0 (the "License");
+ *    you may not use this file except in compliance with the License.
+ *    You may obtain a copy of the License at
+ *
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *    Unless required by applicable law or agreed to in writing, software
+ *    distributed under the License is distributed on an "AS IS" BASIS,
+ *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *    See the License for the specific language governing permissions and
+ *    limitations under the License.
+ */
+
+/**
+ *    @file
+ *      This file defines common Weave Data Language (WDL) resource
+ *      endpoint type enumerations.
+ *
+ */
+
+syntax = "proto3";
+package weave.common;
+
+option java_outer_classname = "WeaveInternalResourceType";
+option objc_class_prefix = "SCM";
+
+// In a separate file from identifiers.proto to avoid recursive inclusion
+
+/**
+ * Standard resource types defined for ResourceId namespacing
+ */
+enum ResourceType {
+  RESOURCE_TYPE_UNSPECIFIED = 0;
+
+  RESOURCE_TYPE_DEVICE = 1;
+  RESOURCE_TYPE_USER = 2;
+  RESOURCE_TYPE_ACCOUNT = 3;
+  RESOURCE_TYPE_AREA = 4;
+  RESOURCE_TYPE_FIXTURE = 5;
+  RESOURCE_TYPE_GROUP = 6;
+  RESOURCE_TYPE_ANNOTATION = 7;
+  RESOURCE_TYPE_STRUCTURE = 8;
+  RESOURCE_TYPE_GUEST = 9;
+
+  /* Some of the existing types were created to describe the nature or type
+   * of the target resource. With the introduction of this new 'SERVICE'
+   * type, there is a shift away from that to the type identifying the form
+   * of the id and how it was generated.
+   *
+   * The SERVICE type shall be used to reference resources that are created
+   * by the Nest service.
+   */
+  RESOURCE_TYPE_SERVICE = 10;
+}

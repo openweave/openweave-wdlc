@@ -1,0 +1,911 @@
+/*
+ *
+ * TestZTrait
+ *
+ */
+syntax = "proto3";
+package nest.test.trait;
+
+option java_outer_classname = "WeaveTestTraitZ";
+option objc_class_prefix = "SCM";
+
+import "google/protobuf/duration.proto";
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/wrappers.proto";
+import "nest/test/trait/test_z_typespace.proto";
+import "wdl/wdl_options.proto";
+import "weave/common/identifiers.proto";
+import "weave/common/string_ref.proto";
+import "weave/common/time.proto";
+
+message TestZTrait {
+    option (wdl.message_type) = TRAIT;
+    option (wdl.trait) = {
+        id: 0x01,
+        stability: ALPHA,
+        vendor_id: NEST,
+        version: 2,
+    };
+
+    // ---------- ENUMS ---------- //
+
+    enum TestZInternalEnum {
+        TEST_Z_INTERNAL_ENUM_UNSPECIFIED = 0;
+        TEST_Z_INTERNAL_ENUM_VALUE_1 = 1;
+        TEST_Z_INTERNAL_ENUM_VALUE_2 = 2;
+        TEST_Z_INTERNAL_ENUM_VALUE_3 = 3;
+
+        // Values begins with number
+        TEST_Z_INTERNAL_ENUM_4 = 4;
+    }
+
+    // ---------- STRUCTS ---------- //
+
+    message TestZInternalStruct {
+        option (wdl.message_type) = STRUCT;
+
+        bool bool = 1;
+    }
+
+    message TestZStruct {
+        option (wdl.message_type) = STRUCT;
+
+        // Standard
+        google.protobuf.Duration  duration_nonnull     = 1;
+        google.protobuf.Duration  duration_nullable    = 2 [(wdl.prop) = {nullable: true}];
+        google.protobuf.Timestamp timestamp_nonnull    = 3;
+        google.protobuf.Timestamp timestamp_nullable   = 4 [(wdl.prop) = {nullable: true}];
+        weave.common.ResourceId   resource_id_nonnull  = 5;
+        weave.common.ResourceId   resource_id_nullable = 6 [(wdl.prop) = {nullable: true}];
+
+        // Non Standard
+        TestZInternalStruct                struct_internal_nonnull  = 7;
+        TestZInternalStruct                struct_internal_nullable = 8 [(wdl.prop) = {nullable: true}];
+        TestZTypespace.TestZExternalStruct struct_external_nonnull  = 9;
+        TestZTypespace.TestZExternalStruct struct_external_nullable = 10 [(wdl.prop) = {nullable: true}];
+
+        // Enum
+        TestZInternalEnum                enum_internal_nonnull = 11;
+        TestZTypespace.TestZExternalEnum enum_external_nonnull = 12;
+
+        // Primitive
+        float  float_nonnull  = 13;
+        double double_nonnull = 14;
+        int64  int64_nonnull  = 15 [jstype = JS_STRING];
+        uint64 uint64_nonnull = 16 [jstype = JS_STRING];
+        int32  int32_nonnull  = 17;
+        uint32 uint32_nonnull = 18;
+        bool   bool_nonnull   = 19;
+        string string_nonnull = 20;
+        bytes  bytes_nonnull  = 21;
+
+        // Wrapped
+        google.protobuf.FloatValue  float_nullable  = 22 [(wdl.prop) = {nullable: true}];
+        google.protobuf.DoubleValue double_nullable = 23 [(wdl.prop) = {nullable: true}];
+        google.protobuf.Int64Value  int64_nullable  = 24 [(wdl.prop) = {nullable: true}];
+        google.protobuf.UInt64Value uint64_nullable = 25 [(wdl.prop) = {nullable: true}];
+        google.protobuf.Int32Value  int32_nullable  = 26 [(wdl.prop) = {nullable: true}];
+        google.protobuf.UInt32Value uint32_nullable = 27 [(wdl.prop) = {nullable: true}];
+        google.protobuf.BoolValue   bool_nullable   = 28 [(wdl.prop) = {nullable: true}];
+        google.protobuf.StringValue string_nullable = 29 [(wdl.prop) = {nullable: true}];
+        google.protobuf.BytesValue  bytes_nullable  = 30 [(wdl.prop) = {nullable: true}];
+
+        // List Standard
+        repeated google.protobuf.Duration  list_duration    = 31;
+        repeated google.protobuf.Timestamp list_timestamp   = 32;
+        repeated weave.common.ResourceId   list_resource_id = 33;
+
+        // List Non Standard
+        repeated TestZInternalStruct                list_struct_internal = 34;
+        repeated TestZTypespace.TestZExternalStruct list_struct_external = 35;
+
+        // List Enum
+        repeated TestZInternalEnum                list_enum_internal = 36;
+        repeated TestZTypespace.TestZExternalEnum list_enum_external = 37;
+
+        // List Primitive
+        repeated float  list_float  = 38;
+        repeated double list_double = 39;
+        repeated int64  list_int64  = 40 [jstype = JS_STRING];
+        repeated uint64 list_uint64 = 41 [jstype = JS_STRING];
+        repeated int32  list_int32  = 42;
+        repeated uint32 list_uint32 = 43;
+        repeated bool   list_bool   = 44;
+        repeated string list_string = 45;
+        repeated bytes  list_bytes  = 46;
+
+        // Map UInt32 Standard
+        map <uint32, google.protobuf.Duration>  map_uint32_duration    = 47;
+        map <uint32, google.protobuf.Timestamp> map_uint32_timestamp   = 48;
+        map <uint32, weave.common.ResourceId>   map_uint32_resource_id = 49;
+
+        // Map UInt32 Non Standard
+        map <uint32, TestZInternalStruct>                map_uint32_struct_internal = 50;
+        map <uint32, TestZTypespace.TestZExternalStruct> map_uint32_struct_external = 51;
+
+        // Map UInt32 Enum
+        map <uint32, TestZInternalEnum>                map_uint32_enum_internal = 52;
+        map <uint32, TestZTypespace.TestZExternalEnum> map_uint32_enum_external = 53;
+
+        // Map UInt32 Primitive
+        map <uint32, float>  map_uint32_float  = 54;
+        map <uint32, double> map_uint32_double = 55;
+        map <uint32, int64>  map_uint32_int64  = 56;
+        map <uint32, uint64> map_uint32_uint64 = 57;
+        map <uint32, int32>  map_uint32_int32  = 58;
+        map <uint32, uint32> map_uint32_uint32 = 59;
+        map <uint32, bool>   map_uint32_bool   = 60;
+        map <uint32, string> map_uint32_string = 61;
+        map <uint32, bytes>  map_uint32_bytes  = 62;
+
+        // Map String Standard
+        map <string, google.protobuf.Duration>  map_string_duration    = 63;
+        map <string, google.protobuf.Timestamp> map_string_timestamp   = 64;
+        map <string, weave.common.ResourceId>   map_string_resource_id = 65;
+
+        // Map String Non Standard
+        map <string, TestZInternalStruct>                map_string_struct_internal = 66;
+        map <string, TestZTypespace.TestZExternalStruct> map_string_struct_external = 67;
+
+        // Map String Enum
+        map <string, TestZInternalEnum>                map_string_enum_internal = 68;
+        map <string, TestZTypespace.TestZExternalEnum> map_string_enum_external = 69;
+
+        // Map UInt32 Primitive
+        map <string, float>  map_string_float  = 70;
+        map <string, double> map_string_double = 71;
+        map <string, int64>  map_string_int64  = 72;
+        map <string, uint64> map_string_uint64 = 73;
+        map <string, int32>  map_string_int32  = 74;
+        map <string, uint32> map_string_uint32 = 75;
+        map <string, bool>   map_string_bool   = 76;
+        map <string, string> map_string_string = 77;
+        map <string, bytes>  map_string_bytes  = 78;
+
+        // Other
+        weave.common.DayOfWeek day_of_week = 79;
+        weave.common.StringRef string_ref  = 80;
+
+        // Comment slash-slash
+        bool slash_slash_comment = 81;
+
+        /// Comment slash-slash-slash
+        bool slash_slash_slash_comment = 82;
+
+        /**
+         *  Comment block
+         *  block
+         *  block
+         *
+         *      - indented block
+         *          - indented block
+         *          - indented block
+         *          - indented block
+         *      - indented block
+         */
+        bool block_comment = 83;
+
+        // Deprecated
+        bool deprecated = 84 [deprecated = true];
+
+        // Reserved
+        bool abstract = 85;
+        // The name 'assert' collides with protoc C++ codegen
+        // bool assert = 86;
+        reserved 86;
+        bool const = 87;
+        bool description = 88;
+        bool for = 89;
+        bool id = 90;
+        bool is = 91;
+        bool protected = 92;
+    }
+
+    // ---------- PROPERTIES ---------- //
+
+    // Standard
+    google.protobuf.Duration  duration_readwrite_nonnull     = 1  [(wdl.prop) = {writable: READ_WRITE}];
+    google.protobuf.Duration  duration_readwrite_nullable    = 2  [(wdl.prop) = {writable: READ_WRITE, nullable: true}];
+    google.protobuf.Duration  duration_readonly_nonnull      = 3  [(wdl.prop) = {writable: READ_ONLY}];
+    google.protobuf.Duration  duration_readonly_nullable     = 4  [(wdl.prop) = {writable: READ_ONLY, nullable: true}];
+    google.protobuf.Timestamp timestamp_readwrite_nonnull    = 5  [(wdl.prop) = {writable: READ_WRITE}];
+    google.protobuf.Timestamp timestamp_readwrite_nullable   = 6  [(wdl.prop) = {writable: READ_WRITE, nullable: true}];
+    google.protobuf.Timestamp timestamp_readonly_nonnull     = 7  [(wdl.prop) = {writable: READ_ONLY}];
+    google.protobuf.Timestamp timestamp_readonly_nullable    = 8  [(wdl.prop) = {writable: READ_ONLY, nullable: true}];
+    weave.common.ResourceId   resource_id_readwrite_nonnull  = 9  [(wdl.prop) = {writable: READ_WRITE}];
+    weave.common.ResourceId   resource_id_readwrite_nullable = 10 [(wdl.prop) = {writable: READ_WRITE, nullable: true}];
+    weave.common.ResourceId   resource_id_readonly_nonnull   = 11 [(wdl.prop) = {writable: READ_ONLY}];
+    weave.common.ResourceId   resource_id_readonly_nullable  = 12 [(wdl.prop) = {writable: READ_ONLY, nullable: true}];
+
+    // Non Standard
+    TestZInternalStruct                struct_internal_readwrite_nonnull  = 13 [(wdl.prop) = {writable: READ_WRITE}];
+    TestZInternalStruct                struct_internal_readwrite_nullable = 14 [(wdl.prop) = {writable: READ_WRITE, nullable: true}];
+    TestZInternalStruct                struct_internal_readonly_nonnull   = 15 [(wdl.prop) = {writable: READ_ONLY}];
+    TestZInternalStruct                struct_internal_readonly_nullable  = 16 [(wdl.prop) = {writable: READ_ONLY, nullable: true}];
+    TestZTypespace.TestZExternalStruct struct_external_readwrite_nonnull  = 17 [(wdl.prop) = {writable: READ_WRITE}];
+    TestZTypespace.TestZExternalStruct struct_external_readwrite_nullable = 18 [(wdl.prop) = {writable: READ_WRITE, nullable: true}];
+    TestZTypespace.TestZExternalStruct struct_external_readonly_nonnull   = 19 [(wdl.prop) = {writable: READ_ONLY}];
+    TestZTypespace.TestZExternalStruct struct_external_readonly_nullable  = 20 [(wdl.prop) = {writable: READ_ONLY, nullable: true}];
+
+    // Enum
+    TestZInternalEnum                enum_internal_readwrite_nonnull = 21 [(wdl.prop) = {writable: READ_WRITE}];
+    TestZInternalEnum                enum_internal_readonly_nonnull  = 22 [(wdl.prop) = {writable: READ_ONLY}];
+    TestZTypespace.TestZExternalEnum enum_external_readwrite_nonnull = 23 [(wdl.prop) = {writable: READ_WRITE}];
+    TestZTypespace.TestZExternalEnum enum_external_readonly_nonnull  = 24 [(wdl.prop) = {writable: READ_ONLY}];
+
+    // Primitive
+    float  float_readwrite_nonnull  = 25 [(wdl.prop) = {writable: READ_WRITE}];
+    float  float_readonly_nonnull   = 26 [(wdl.prop) = {writable: READ_ONLY}];
+    double double_readwrite_nonnull = 27 [(wdl.prop) = {writable: READ_WRITE}];
+    double double_readonly_nonnull  = 28 [(wdl.prop) = {writable: READ_ONLY}];
+    int64  int64_readwrite_nonnull  = 29 [(wdl.prop) = {writable: READ_WRITE}];
+    int64  int64_readonly_nonnull   = 30 [(wdl.prop) = {writable: READ_ONLY}];
+    uint64 uint64_readwrite_nonnull = 31 [(wdl.prop) = {writable: READ_WRITE}];
+    uint64 uint64_readonly_nonnull  = 32 [(wdl.prop) = {writable: READ_ONLY}];
+    int32  int32_readwrite_nonnull  = 33 [(wdl.prop) = {writable: READ_WRITE}];
+    int32  int32_readonly_nonnull   = 34 [(wdl.prop) = {writable: READ_ONLY}];
+    uint32 uint32_readwrite_nonnull = 35 [(wdl.prop) = {writable: READ_WRITE}];
+    uint32 uint32_readonly_nonnull  = 36 [(wdl.prop) = {writable: READ_ONLY}];
+    bool   bool_readwrite_nonnull   = 37 [(wdl.prop) = {writable: READ_WRITE}];
+    bool   bool_readonly_nonnull    = 38 [(wdl.prop) = {writable: READ_ONLY}];
+    string string_readwrite_nonnull = 39 [(wdl.prop) = {writable: READ_WRITE}];
+    string string_readonly_nonnull  = 40 [(wdl.prop) = {writable: READ_ONLY}];
+    bytes  bytes_readwrite_nonnull  = 41 [(wdl.prop) = {writable: READ_WRITE}];
+    bytes  bytes_readonly_nonnull   = 42 [(wdl.prop) = {writable: READ_ONLY}];
+
+    // Wrapped
+    google.protobuf.FloatValue  float_readwrite_nullable  = 43 [(wdl.prop) = {writable: READ_WRITE, nullable: true}];
+    google.protobuf.FloatValue  float_readonly_nullable   = 44 [(wdl.prop) = {writable: READ_ONLY, nullable: true}];
+    google.protobuf.DoubleValue double_readwrite_nullable = 45 [(wdl.prop) = {writable: READ_WRITE, nullable: true}];
+    google.protobuf.DoubleValue double_readonly_nullable  = 46 [(wdl.prop) = {writable: READ_ONLY, nullable: true}];
+    google.protobuf.Int64Value  int64_readwrite_nullable  = 47 [(wdl.prop) = {writable: READ_WRITE, nullable: true}];
+    google.protobuf.Int64Value  int64_readonly_nullable   = 48 [(wdl.prop) = {writable: READ_ONLY, nullable: true}];
+    google.protobuf.UInt64Value uint64_readwrite_nullable = 49 [(wdl.prop) = {writable: READ_WRITE, nullable: true}];
+    google.protobuf.UInt64Value uint64_readonly_nullable  = 50 [(wdl.prop) = {writable: READ_ONLY, nullable: true}];
+    google.protobuf.Int32Value  int32_readwrite_nullable  = 51 [(wdl.prop) = {writable: READ_WRITE, nullable: true}];
+    google.protobuf.Int32Value  int32_readonly_nullable   = 52 [(wdl.prop) = {writable: READ_ONLY, nullable: true}];
+    google.protobuf.UInt32Value uint32_readwrite_nullable = 53 [(wdl.prop) = {writable: READ_WRITE, nullable: true}];
+    google.protobuf.UInt32Value uint32_readonly_nullable  = 54 [(wdl.prop) = {writable: READ_ONLY, nullable: true}];
+    google.protobuf.BoolValue   bool_readwrite_nullable   = 55 [(wdl.prop) = {writable: READ_WRITE, nullable: true}];
+    google.protobuf.BoolValue   bool_readonly_nullable    = 56 [(wdl.prop) = {writable: READ_ONLY, nullable: true}];
+    google.protobuf.StringValue string_readwrite_nullable = 57 [(wdl.prop) = {writable: READ_WRITE, nullable: true}];
+    google.protobuf.StringValue string_readonly_nullable  = 58 [(wdl.prop) = {writable: READ_ONLY, nullable: true}];
+    google.protobuf.BytesValue  bytes_readwrite_nullable  = 59 [(wdl.prop) = {writable: READ_WRITE, nullable: true}];
+    google.protobuf.BytesValue  bytes_readonly_nullable   = 60 [(wdl.prop) = {writable: READ_ONLY, nullable: true}];
+
+    // List Standard
+    repeated google.protobuf.Duration  list_duration_readonly     = 62 [(wdl.prop) = {writable: READ_ONLY}];
+    repeated google.protobuf.Timestamp list_timestamp_readonly    = 64 [(wdl.prop) = {writable: READ_ONLY}];
+    repeated weave.common.ResourceId   list_resource_id_readonly  = 66 [(wdl.prop) = {writable: READ_ONLY}];
+
+    // List Non Standard
+    repeated TestZInternalStruct                list_struct_internal_readonly = 67 [(wdl.prop) = {writable: READ_ONLY}];
+    repeated TestZTypespace.TestZExternalStruct list_struct_external_readonly = 68 [(wdl.prop) = {writable: READ_ONLY}];
+
+    // List Enum
+    repeated TestZInternalEnum                list_enum_internal_readwrite = 69 [(wdl.prop) = {writable: READ_WRITE}];
+    repeated TestZInternalEnum                list_enum_internal_readonly  = 70 [(wdl.prop) = {writable: READ_ONLY}];
+    repeated TestZTypespace.TestZExternalEnum list_enum_external_readwrite = 71 [(wdl.prop) = {writable: READ_WRITE}];
+    repeated TestZTypespace.TestZExternalEnum list_enum_external_readonly  = 72 [(wdl.prop) = {writable: READ_ONLY}];
+
+    // List Primitive
+    repeated float  list_float_readwrite  = 73 [(wdl.prop) = {writable: READ_WRITE}];
+    repeated float  list_float_readonly   = 74 [(wdl.prop) = {writable: READ_ONLY}];
+    repeated double list_double_readwrite = 75 [(wdl.prop) = {writable: READ_WRITE}];
+    repeated double list_double_readonly  = 76 [(wdl.prop) = {writable: READ_ONLY}];
+    repeated int64  list_int64_readwrite  = 77 [(wdl.prop) = {writable: READ_WRITE}];
+    repeated int64  list_int64_readonly   = 78 [(wdl.prop) = {writable: READ_ONLY}];
+    repeated uint64 list_uint64_readwrite = 79 [(wdl.prop) = {writable: READ_WRITE}];
+    repeated uint64 list_uint64_readonly  = 80 [(wdl.prop) = {writable: READ_ONLY}];
+    repeated int32  list_int32_readwrite  = 81 [(wdl.prop) = {writable: READ_WRITE}];
+    repeated int32  list_int32_readonly   = 82 [(wdl.prop) = {writable: READ_ONLY}];
+    repeated uint32 list_uint32_readwrite = 83 [(wdl.prop) = {writable: READ_WRITE}];
+    repeated uint32 list_uint32_readonly  = 84 [(wdl.prop) = {writable: READ_ONLY}];
+    repeated bool   list_bool_readwrite   = 85 [(wdl.prop) = {writable: READ_WRITE}];
+    repeated bool   list_bool_readonly    = 86 [(wdl.prop) = {writable: READ_ONLY}];
+    repeated string list_string_readwrite = 87 [(wdl.prop) = {writable: READ_WRITE}];
+    repeated string list_string_readonly  = 88 [(wdl.prop) = {writable: READ_ONLY}];
+    repeated bytes  list_bytes_readwrite  = 89 [(wdl.prop) = {writable: READ_WRITE}];
+    repeated bytes  list_bytes_readonly   = 90 [(wdl.prop) = {writable: READ_ONLY}];
+
+    // Map UInt32 Standard
+    map <uint32, google.protobuf.Duration>  map_uint32_duration_readwrite    = 91 [(wdl.prop) = {writable: READ_WRITE}];
+    map <uint32, google.protobuf.Duration>  map_uint32_duration_readonly     = 92 [(wdl.prop) = {writable: READ_ONLY}];
+    map <uint32, google.protobuf.Timestamp> map_uint32_timestamp_readwrite   = 93 [(wdl.prop) = {writable: READ_WRITE}];
+    map <uint32, google.protobuf.Timestamp> map_uint32_timestamp_readonly    = 94 [(wdl.prop) = {writable: READ_ONLY}];
+    map <uint32, weave.common.ResourceId>   map_uint32_resource_id_readwrite = 95 [(wdl.prop) = {writable: READ_WRITE}];
+    map <uint32, weave.common.ResourceId>   map_uint32_resource_id_readonly  = 96 [(wdl.prop) = {writable: READ_ONLY}];
+
+    // Map UInt32 Non Standard
+    map <uint32, TestZInternalStruct>                map_uint32_struct_internal_readwrite = 97 [(wdl.prop) = {writable: READ_WRITE}];
+    map <uint32, TestZInternalStruct>                map_uint32_struct_internal_readonly  = 98 [(wdl.prop) = {writable: READ_ONLY}];
+    map <uint32, TestZTypespace.TestZExternalStruct> map_uint32_struct_external_readwrite = 99 [(wdl.prop) = {writable: READ_WRITE}];
+    map <uint32, TestZTypespace.TestZExternalStruct> map_uint32_struct_external_readonly  = 100 [(wdl.prop) = {writable: READ_ONLY}];
+
+    // Map UInt32 Enum
+    map <uint32, TestZInternalEnum>                map_uint32_enum_internal_readwrite = 101 [(wdl.prop) = {writable: READ_WRITE}];
+    map <uint32, TestZInternalEnum>                map_uint32_enum_internal_readonly  = 102 [(wdl.prop) = {writable: READ_ONLY}];
+    map <uint32, TestZTypespace.TestZExternalEnum> map_uint32_enum_external_readwrite = 103 [(wdl.prop) = {writable: READ_WRITE}];
+    map <uint32, TestZTypespace.TestZExternalEnum> map_uint32_enum_external_readonly  = 104 [(wdl.prop) = {writable: READ_ONLY}];
+
+    // Map UInt32 Primitive
+    map <uint32, float>  map_uint32_float_readwrite  = 105 [(wdl.prop) = {writable: READ_WRITE}];
+    map <uint32, float>  map_uint32_float_readonly   = 106 [(wdl.prop) = {writable: READ_ONLY}];
+    map <uint32, double> map_uint32_double_readwrite = 107 [(wdl.prop) = {writable: READ_WRITE}];
+    map <uint32, double> map_uint32_double_readonly  = 108 [(wdl.prop) = {writable: READ_ONLY}];
+    map <uint32, int64>  map_uint32_int64_readwrite  = 109 [(wdl.prop) = {writable: READ_WRITE}];
+    map <uint32, int64>  map_uint32_int64_readonly   = 110 [(wdl.prop) = {writable: READ_ONLY}];
+    map <uint32, uint64> map_uint32_uint64_readwrite = 111 [(wdl.prop) = {writable: READ_WRITE}];
+    map <uint32, uint64> map_uint32_uint64_readonly  = 112 [(wdl.prop) = {writable: READ_ONLY}];
+    map <uint32, int32>  map_uint32_int32_readwrite  = 113 [(wdl.prop) = {writable: READ_WRITE}];
+    map <uint32, int32>  map_uint32_int32_readonly   = 114 [(wdl.prop) = {writable: READ_ONLY}];
+    map <uint32, uint32> map_uint32_uint32_readwrite = 115 [(wdl.prop) = {writable: READ_WRITE}];
+    map <uint32, uint32> map_uint32_uint32_readonly  = 116 [(wdl.prop) = {writable: READ_ONLY}];
+    map <uint32, bool>   map_uint32_bool_readwrite   = 117 [(wdl.prop) = {writable: READ_WRITE}];
+    map <uint32, bool>   map_uint32_bool_readonly    = 118 [(wdl.prop) = {writable: READ_ONLY}];
+    map <uint32, string> map_uint32_string_readwrite = 119 [(wdl.prop) = {writable: READ_WRITE}];
+    map <uint32, string> map_uint32_string_readonly  = 120 [(wdl.prop) = {writable: READ_ONLY}];
+    map <uint32, bytes>  map_uint32_bytes_readwrite  = 121 [(wdl.prop) = {writable: READ_WRITE}];
+    map <uint32, bytes>  map_uint32_bytes_readonly   = 122 [(wdl.prop) = {writable: READ_ONLY}];
+
+    // Map String Standard
+    map <string, google.protobuf.Duration>  map_string_duration_readwrite    = 123 [(wdl.prop) = {writable: READ_WRITE}];
+    map <string, google.protobuf.Duration>  map_string_duration_readonly     = 124 [(wdl.prop) = {writable: READ_ONLY}];
+    map <string, google.protobuf.Timestamp> map_string_timestamp_readwrite   = 125 [(wdl.prop) = {writable: READ_WRITE}];
+    map <string, google.protobuf.Timestamp> map_string_timestamp_readonly    = 126 [(wdl.prop) = {writable: READ_ONLY}];
+    map <string, weave.common.ResourceId>   map_string_resource_id_readwrite = 127 [(wdl.prop) = {writable: READ_WRITE}];
+    map <string, weave.common.ResourceId>   map_string_resource_id_readonly  = 128 [(wdl.prop) = {writable: READ_ONLY}];
+
+    // Map String Non Standard
+    map <string, TestZInternalStruct>                map_string_struct_internal_readwrite = 129 [(wdl.prop) = {writable: READ_WRITE}];
+    map <string, TestZInternalStruct>                map_string_struct_internal_readonly  = 130 [(wdl.prop) = {writable: READ_ONLY}];
+    map <string, TestZTypespace.TestZExternalStruct> map_string_struct_external_readwrite = 131 [(wdl.prop) = {writable: READ_WRITE}];
+    map <string, TestZTypespace.TestZExternalStruct> map_string_struct_external_readonly  = 132 [(wdl.prop) = {writable: READ_ONLY}];
+
+    // Map String Enum
+    map <string, TestZInternalEnum>                map_string_enum_internal_readwrite = 133 [(wdl.prop) = {writable: READ_WRITE}];
+    map <string, TestZInternalEnum>                map_string_enum_internal_readonly  = 134 [(wdl.prop) = {writable: READ_ONLY}];
+    map <string, TestZTypespace.TestZExternalEnum> map_string_enum_external_readwrite = 135 [(wdl.prop) = {writable: READ_WRITE}];
+    map <string, TestZTypespace.TestZExternalEnum> map_string_enum_external_readonly  = 136 [(wdl.prop) = {writable: READ_ONLY}];
+
+    // Map String Primitive
+    map <string, float>  map_string_float_readwrite  = 137 [(wdl.prop) = {writable: READ_WRITE}];
+    map <string, float>  map_string_float_readonly   = 138 [(wdl.prop) = {writable: READ_ONLY}];
+    map <string, double> map_string_double_readwrite = 139 [(wdl.prop) = {writable: READ_WRITE}];
+    map <string, double> map_string_double_readonly  = 140 [(wdl.prop) = {writable: READ_ONLY}];
+    map <string, int64>  map_string_int64_readwrite  = 141 [(wdl.prop) = {writable: READ_WRITE}];
+    map <string, int64>  map_string_int64_readonly   = 142 [(wdl.prop) = {writable: READ_ONLY}];
+    map <string, uint64> map_string_uint64_readwrite = 143 [(wdl.prop) = {writable: READ_WRITE}];
+    map <string, uint64> map_string_uint64_readonly  = 144 [(wdl.prop) = {writable: READ_ONLY}];
+    map <string, int32>  map_string_int32_readwrite  = 145 [(wdl.prop) = {writable: READ_WRITE}];
+    map <string, int32>  map_string_int32_readonly   = 146 [(wdl.prop) = {writable: READ_ONLY}];
+    map <string, uint32> map_string_uint32_readwrite = 147 [(wdl.prop) = {writable: READ_WRITE}];
+    map <string, uint32> map_string_uint32_readonly  = 148 [(wdl.prop) = {writable: READ_ONLY}];
+    map <string, bool>   map_string_bool_readwrite   = 149 [(wdl.prop) = {writable: READ_WRITE}];
+    map <string, bool>   map_string_bool_readonly    = 150 [(wdl.prop) = {writable: READ_ONLY}];
+    map <string, string> map_string_string_readwrite = 151 [(wdl.prop) = {writable: READ_WRITE}];
+    map <string, string> map_string_string_readonly  = 152 [(wdl.prop) = {writable: READ_ONLY}];
+    map <string, bytes>  map_string_bytes_readwrite  = 153 [(wdl.prop) = {writable: READ_WRITE}];
+    map <string, bytes>  map_string_bytes_readonly   = 154 [(wdl.prop) = {writable: READ_ONLY}];
+
+    // Other
+    weave.common.DayOfWeek day_of_week = 155;
+    weave.common.StringRef string_ref  = 156;
+
+    // Comment slash-slash
+    bool slash_slash_comment = 157;
+
+    /// Comment slash-slash-slash
+    bool slash_slash_slash_comment = 158;
+
+    /**
+     *  Comment block
+     *  block
+     *  block
+     *
+     *      - indented block
+     *          - indented block
+     *          - indented block
+     *          - indented block
+     *      - indented block
+     */
+    bool block_comment = 159;
+
+    // Deprecated
+    bool deprecated = 160 [deprecated = true];
+
+    // Reserved
+    bool abstract = 161;
+    // The name 'assert' collides with protoc C++ codegen
+    // bool assert = 162;
+    reserved 162;
+    bool const = 163;
+    bool description = 164;
+    bool for = 165;
+    bool id = 166;
+    bool is = 167;
+    bool protected = 168;
+
+    // ---------- COMMANDS ---------- //
+
+    message TestZBasicCommandRequest {
+        option (wdl.message_type) = COMMAND;
+        option (wdl.command) = {
+            id: 0x03,
+        };
+
+        bool bool = 1;
+    }
+
+    message TestZStructCommandRequest {
+        option (wdl.message_type) = COMMAND;
+        option (wdl.command) = {
+            id: 0x02,
+            completion_event: "TestZStructCommandResponse",
+        };
+
+        // Standard
+        google.protobuf.Duration  duration_nonnull     = 1;
+        google.protobuf.Duration  duration_nullable    = 2 [(wdl.param) = {nullable: true}];
+        google.protobuf.Timestamp timestamp_nonnull    = 3;
+        google.protobuf.Timestamp timestamp_nullable   = 4 [(wdl.param) = {nullable: true}];
+        weave.common.ResourceId   resource_id_nonnull  = 5;
+        weave.common.ResourceId   resource_id_nullable = 6 [(wdl.param) = {nullable: true}];
+
+        // Non Standard
+        TestZInternalStruct                struct_internal_nonnull  = 7;
+        TestZInternalStruct                struct_internal_nullable = 8 [(wdl.param) = {nullable: true}];
+        TestZTypespace.TestZExternalStruct struct_external_nonnull  = 9;
+        TestZTypespace.TestZExternalStruct struct_external_nullable = 10 [(wdl.param) = {nullable: true}];
+
+        // Enum
+        TestZInternalEnum                enum_internal_nonnull = 11;
+        TestZTypespace.TestZExternalEnum enum_external_nonnull = 12;
+
+        // Primitive
+        float  float_nonnull  = 13;
+        double double_nonnull = 14;
+        int64  int64_nonnull  = 15 [jstype = JS_STRING];
+        uint64 uint64_nonnull = 16 [jstype = JS_STRING];
+        int32  int32_nonnull  = 17;
+        uint32 uint32_nonnull = 18;
+        bool   bool_nonnull   = 19;
+        string string_nonnull = 20;
+        bytes  bytes_nonnull  = 21;
+
+        // Wrapped
+        google.protobuf.FloatValue  float_nullable  = 22 [(wdl.param) = {nullable: true}];
+        google.protobuf.DoubleValue double_nullable = 23 [(wdl.param) = {nullable: true}];
+        google.protobuf.Int64Value  int64_nullable  = 24 [(wdl.param) = {nullable: true}];
+        google.protobuf.UInt64Value uint64_nullable = 25 [(wdl.param) = {nullable: true}];
+        google.protobuf.Int32Value  int32_nullable  = 26 [(wdl.param) = {nullable: true}];
+        google.protobuf.UInt32Value uint32_nullable = 27 [(wdl.param) = {nullable: true}];
+        google.protobuf.BoolValue   bool_nullable   = 28 [(wdl.param) = {nullable: true}];
+        google.protobuf.StringValue string_nullable = 29 [(wdl.param) = {nullable: true}];
+        google.protobuf.BytesValue  bytes_nullable  = 30 [(wdl.param) = {nullable: true}];
+
+        // List Standard
+        repeated google.protobuf.Duration  list_duration    = 31;
+        repeated google.protobuf.Timestamp list_timestamp   = 32;
+        repeated weave.common.ResourceId   list_resource_id = 33;
+
+        // List Non Standard
+        repeated TestZInternalStruct                list_struct_internal = 34;
+        repeated TestZTypespace.TestZExternalStruct list_struct_external = 35;
+
+        // List Enum
+        repeated TestZInternalEnum                list_enum_internal = 36;
+        repeated TestZTypespace.TestZExternalEnum list_enum_external = 37;
+
+        // List Primitive
+        repeated float  list_float  = 38;
+        repeated double list_double = 39;
+        repeated int64  list_int64  = 40 [jstype = JS_STRING];
+        repeated uint64 list_uint64 = 41 [jstype = JS_STRING];
+        repeated int32  list_int32  = 42;
+        repeated uint32 list_uint32 = 43;
+        repeated bool   list_bool   = 44;
+        repeated string list_string = 45;
+        repeated bytes  list_bytes  = 46;
+
+        // Map UInt32 Standard
+        map <uint32, google.protobuf.Duration>  map_uint32_duration    = 47;
+        map <uint32, google.protobuf.Timestamp> map_uint32_timestamp   = 48;
+        map <uint32, weave.common.ResourceId>   map_uint32_resource_id = 49;
+
+        // Map UInt32 Non Standard
+        map <uint32, TestZInternalStruct>                map_uint32_struct_internal = 50;
+        map <uint32, TestZTypespace.TestZExternalStruct> map_uint32_struct_external = 51;
+
+        // Map UInt32 Enum
+        map <uint32, TestZInternalEnum>                map_uint32_enum_internal = 52;
+        map <uint32, TestZTypespace.TestZExternalEnum> map_uint32_enum_external = 53;
+
+        // Map UInt32 Primitive
+        map <uint32, float>  map_uint32_float  = 54;
+        map <uint32, double> map_uint32_double = 55;
+        map <uint32, int64>  map_uint32_int64  = 56;
+        map <uint32, uint64> map_uint32_uint64 = 57;
+        map <uint32, int32>  map_uint32_int32  = 58;
+        map <uint32, uint32> map_uint32_uint32 = 59;
+        map <uint32, bool>   map_uint32_bool   = 60;
+        map <uint32, string> map_uint32_string = 61;
+        map <uint32, bytes>  map_uint32_bytes  = 62;
+
+        // Map String Standard
+        map <string, google.protobuf.Duration>  map_string_duration    = 63;
+        map <string, google.protobuf.Timestamp> map_string_timestamp   = 64;
+        map <string, weave.common.ResourceId>   map_string_resource_id = 65;
+
+        // Map String Non Standard
+        map <string, TestZInternalStruct>                map_string_struct_internal = 66;
+        map <string, TestZTypespace.TestZExternalStruct> map_string_struct_external = 67;
+
+        // Map String Enum
+        map <string, TestZInternalEnum>                map_string_enum_internal = 68;
+        map <string, TestZTypespace.TestZExternalEnum> map_string_enum_external = 69;
+
+        // Map UInt32 Primitive
+        map <string, float>  map_string_float  = 70;
+        map <string, double> map_string_double = 71;
+        map <string, int64>  map_string_int64  = 72;
+        map <string, uint64> map_string_uint64 = 73;
+        map <string, int32>  map_string_int32  = 74;
+        map <string, uint32> map_string_uint32 = 75;
+        map <string, bool>   map_string_bool   = 76;
+        map <string, string> map_string_string = 77;
+        map <string, bytes>  map_string_bytes  = 78;
+
+        // Other
+        weave.common.DayOfWeek day_of_week = 79;
+        weave.common.StringRef string_ref  = 80;
+
+        // Comment slash-slash
+        bool slash_slash_comment = 81;
+
+        /// Comment slash-slash-slash
+        bool slash_slash_slash_comment = 82;
+
+        /**
+         *  Comment block
+         *  block
+         *  block
+         *
+         *      - indented block
+         *          - indented block
+         *          - indented block
+         *          - indented block
+         *      - indented block
+         */
+        bool block_comment = 83;
+
+        // Deprecated
+        bool deprecated = 84 [deprecated = true];
+
+        // Reserved
+        bool abstract = 85;
+        // The name 'assert' collides with protoc C++ codegen
+        // bool assert = 86;
+        reserved 86;
+        bool const = 87;
+        bool description = 88;
+        bool for = 89;
+        bool id = 90;
+        bool is = 91;
+        bool protected = 92;
+    }
+
+    message TestZStructCommandResponse {
+        option (wdl.message_type) = RESPONSE_EVENT;
+
+        // Standard
+        google.protobuf.Duration  duration_nonnull     = 1;
+        google.protobuf.Duration  duration_nullable    = 2 [(wdl.param) = {nullable: true}];
+        google.protobuf.Timestamp timestamp_nonnull    = 3;
+        google.protobuf.Timestamp timestamp_nullable   = 4 [(wdl.param) = {nullable: true}];
+        weave.common.ResourceId   resource_id_nonnull  = 5;
+        weave.common.ResourceId   resource_id_nullable = 6 [(wdl.param) = {nullable: true}];
+
+        // Non Standard
+        TestZInternalStruct                struct_internal_nonnull  = 7;
+        TestZInternalStruct                struct_internal_nullable = 8 [(wdl.param) = {nullable: true}];
+        TestZTypespace.TestZExternalStruct struct_external_nonnull  = 9;
+        TestZTypespace.TestZExternalStruct struct_external_nullable = 10 [(wdl.param) = {nullable: true}];
+
+        // Enum
+        TestZInternalEnum                enum_internal_nonnull = 11;
+        TestZTypespace.TestZExternalEnum enum_external_nonnull = 12;
+
+        // Primitive
+        float  float_nonnull  = 13;
+        double double_nonnull = 14;
+        int64  int64_nonnull  = 15;
+        uint64 uint64_nonnull = 16;
+        int32  int32_nonnull  = 17;
+        uint32 uint32_nonnull = 18;
+        bool   bool_nonnull   = 19;
+        string string_nonnull = 20;
+        bytes  bytes_nonnull  = 21;
+
+        // Wrapped
+        google.protobuf.FloatValue  float_nullable  = 22 [(wdl.param) = {nullable: true}];
+        google.protobuf.DoubleValue double_nullable = 23 [(wdl.param) = {nullable: true}];
+        google.protobuf.Int64Value  int64_nullable  = 24 [(wdl.param) = {nullable: true}];
+        google.protobuf.UInt64Value uint64_nullable = 25 [(wdl.param) = {nullable: true}];
+        google.protobuf.Int32Value  int32_nullable  = 26 [(wdl.param) = {nullable: true}];
+        google.protobuf.UInt32Value uint32_nullable = 27 [(wdl.param) = {nullable: true}];
+        google.protobuf.BoolValue   bool_nullable   = 28 [(wdl.param) = {nullable: true}];
+        google.protobuf.StringValue string_nullable = 29 [(wdl.param) = {nullable: true}];
+        google.protobuf.BytesValue  bytes_nullable  = 30 [(wdl.param) = {nullable: true}];
+
+        // List Standard
+        repeated google.protobuf.Duration  list_duration    = 31;
+        repeated google.protobuf.Timestamp list_timestamp   = 32;
+        repeated weave.common.ResourceId   list_resource_id = 33;
+
+        // List Non Standard
+        repeated TestZInternalStruct                list_struct_internal = 34;
+        repeated TestZTypespace.TestZExternalStruct list_struct_external = 35;
+
+        // List Enum
+        repeated TestZInternalEnum                list_enum_internal = 36;
+        repeated TestZTypespace.TestZExternalEnum list_enum_external = 37;
+
+        // List Primitive
+        repeated float  list_float  = 38;
+        repeated double list_double = 39;
+        repeated int64  list_int64  = 40 [jstype = JS_STRING];
+        repeated uint64 list_uint64 = 41 [jstype = JS_STRING];
+        repeated int32  list_int32  = 42;
+        repeated uint32 list_uint32 = 43;
+        repeated bool   list_bool   = 44;
+        repeated string list_string = 45;
+        repeated bytes  list_bytes  = 46;
+
+        // Map UInt32 Standard
+        map <uint32, google.protobuf.Duration>  map_uint32_duration    = 47;
+        map <uint32, google.protobuf.Timestamp> map_uint32_timestamp   = 48;
+        map <uint32, weave.common.ResourceId>   map_uint32_resource_id = 49;
+
+        // Map UInt32 Non Standard
+        map <uint32, TestZInternalStruct>                map_uint32_struct_internal = 50;
+        map <uint32, TestZTypespace.TestZExternalStruct> map_uint32_struct_external = 51;
+
+        // Map UInt32 Enum
+        map <uint32, TestZInternalEnum>                map_uint32_enum_internal = 52;
+        map <uint32, TestZTypespace.TestZExternalEnum> map_uint32_enum_external = 53;
+
+        // Map UInt32 Primitive
+        map <uint32, float>  map_uint32_float  = 54;
+        map <uint32, double> map_uint32_double = 55;
+        map <uint32, int64>  map_uint32_int64  = 56;
+        map <uint32, uint64> map_uint32_uint64 = 57;
+        map <uint32, int32>  map_uint32_int32  = 58;
+        map <uint32, uint32> map_uint32_uint32 = 59;
+        map <uint32, bool>   map_uint32_bool   = 60;
+        map <uint32, string> map_uint32_string = 61;
+        map <uint32, bytes>  map_uint32_bytes  = 62;
+
+        // Map String Standard
+        map <string, google.protobuf.Duration>  map_string_duration    = 63;
+        map <string, google.protobuf.Timestamp> map_string_timestamp   = 64;
+        map <string, weave.common.ResourceId>   map_string_resource_id = 65;
+
+        // Map String Non Standard
+        map <string, TestZInternalStruct>                map_string_struct_internal = 66;
+        map <string, TestZTypespace.TestZExternalStruct> map_string_struct_external = 67;
+
+        // Map String Enum
+        map <string, TestZInternalEnum>                map_string_enum_internal = 68;
+        map <string, TestZTypespace.TestZExternalEnum> map_string_enum_external = 69;
+
+        // Map UInt32 Primitive
+        map <string, float>  map_string_float  = 70;
+        map <string, double> map_string_double = 71;
+        map <string, int64>  map_string_int64  = 72;
+        map <string, uint64> map_string_uint64 = 73;
+        map <string, int32>  map_string_int32  = 74;
+        map <string, uint32> map_string_uint32 = 75;
+        map <string, bool>   map_string_bool   = 76;
+        map <string, string> map_string_string = 77;
+        map <string, bytes>  map_string_bytes  = 78;
+
+        // Other
+        weave.common.DayOfWeek day_of_week = 79;
+        weave.common.StringRef string_ref  = 80;
+
+        // Comment slash-slash
+        bool slash_slash_comment = 81;
+
+        /// Comment slash-slash-slash
+        bool slash_slash_slash_comment = 82;
+
+        /**
+         *  Comment block
+         *  block
+         *  block
+         *
+         *      - indented block
+         *          - indented block
+         *          - indented block
+         *          - indented block
+         *      - indented block
+         */
+        bool block_comment = 83;
+
+        // Deprecated
+        bool deprecated = 84 [deprecated = true];
+
+        // Reserved
+        bool abstract = 85;
+        // The name 'assert' collides with protoc C++ codegen
+        // bool assert = 86;
+        reserved 86;
+        bool const = 87;
+        bool description = 88;
+        bool for = 89;
+        bool id = 90;
+        bool is = 91;
+        bool protected = 92;
+    }
+
+    // ---------- Events ---------- //
+
+    message TestZEvent {
+        option (wdl.message_type) = EVENT;
+        option (wdl.event) = {
+            id: 0x04,
+            event_importance: EVENT_IMPORTANCE_PRODUCTION_STANDARD,
+        };
+
+        // Standard
+        google.protobuf.Duration  duration_nonnull     = 1;
+        google.protobuf.Duration  duration_nullable    = 2 [(wdl.param) = {nullable: true}];
+        google.protobuf.Timestamp timestamp_nonnull    = 3;
+        google.protobuf.Timestamp timestamp_nullable   = 4 [(wdl.param) = {nullable: true}];
+        weave.common.ResourceId   resource_id_nonnull  = 5;
+        weave.common.ResourceId   resource_id_nullable = 6 [(wdl.param) = {nullable: true}];
+
+        // Non Standard
+        TestZInternalStruct                struct_internal_nonnull  = 7;
+        TestZInternalStruct                struct_internal_nullable = 8 [(wdl.param) = {nullable: true}];
+        TestZTypespace.TestZExternalStruct struct_external_nonnull  = 9;
+        TestZTypespace.TestZExternalStruct struct_external_nullable = 10 [(wdl.param) = {nullable: true}];
+
+        // Enum
+        TestZInternalEnum                enum_internal_nonnull = 11;
+        TestZTypespace.TestZExternalEnum enum_external_nonnull = 12;
+
+        // Primitive
+        float  float_nonnull  = 13;
+        double double_nonnull = 14;
+        int64  int64_nonnull  = 15 [jstype = JS_STRING];
+        uint64 uint64_nonnull = 16 [jstype = JS_STRING];
+        int32  int32_nonnull  = 17;
+        uint32 uint32_nonnull = 18;
+        bool   bool_nonnull   = 19;
+        string string_nonnull = 20;
+        bytes  bytes_nonnull  = 21;
+
+        // Wrapped
+        google.protobuf.FloatValue  float_nullable  = 22 [(wdl.param) = {nullable: true}];
+        google.protobuf.DoubleValue double_nullable = 23 [(wdl.param) = {nullable: true}];
+        google.protobuf.Int64Value  int64_nullable  = 24 [(wdl.param) = {nullable: true}];
+        google.protobuf.UInt64Value uint64_nullable = 25 [(wdl.param) = {nullable: true}];
+        google.protobuf.Int32Value  int32_nullable  = 26 [(wdl.param) = {nullable: true}];
+        google.protobuf.UInt32Value uint32_nullable = 27 [(wdl.param) = {nullable: true}];
+        google.protobuf.BoolValue   bool_nullable   = 28 [(wdl.param) = {nullable: true}];
+        google.protobuf.StringValue string_nullable = 29 [(wdl.param) = {nullable: true}];
+        google.protobuf.BytesValue  bytes_nullable  = 30 [(wdl.param) = {nullable: true}];
+
+        // List Standard
+        repeated google.protobuf.Duration  list_duration    = 31;
+        repeated google.protobuf.Timestamp list_timestamp   = 32;
+        repeated weave.common.ResourceId   list_resource_id = 33;
+
+        // List Non Standard
+        repeated TestZInternalStruct                list_struct_internal = 34;
+        repeated TestZTypespace.TestZExternalStruct list_struct_external = 35;
+
+        // List Enum
+        repeated TestZInternalEnum                list_enum_internal = 36;
+        repeated TestZTypespace.TestZExternalEnum list_enum_external = 37;
+
+        // List Primitive
+        repeated float  list_float  = 38;
+        repeated double list_double = 39;
+        repeated int64  list_int64  = 40 [jstype = JS_STRING];
+        repeated uint64 list_uint64 = 41 [jstype = JS_STRING];
+        repeated int32  list_int32  = 42;
+        repeated uint32 list_uint32 = 43;
+        repeated bool   list_bool   = 44;
+        repeated string list_string = 45;
+        repeated bytes  list_bytes  = 46;
+
+        // Map UInt32 Standard
+        map <uint32, google.protobuf.Duration>  map_uint32_duration    = 47;
+        map <uint32, google.protobuf.Timestamp> map_uint32_timestamp   = 48;
+        map <uint32, weave.common.ResourceId>   map_uint32_resource_id = 49;
+
+        // Map UInt32 Non Standard
+        map <uint32, TestZInternalStruct>                map_uint32_struct_internal = 50;
+        map <uint32, TestZTypespace.TestZExternalStruct> map_uint32_struct_external = 51;
+
+        // Map UInt32 Enum
+        map <uint32, TestZInternalEnum>                map_uint32_enum_internal = 52;
+        map <uint32, TestZTypespace.TestZExternalEnum> map_uint32_enum_external = 53;
+
+        // Map UInt32 Primitive
+        map <uint32, float>  map_uint32_float  = 54;
+        map <uint32, double> map_uint32_double = 55;
+        map <uint32, int64>  map_uint32_int64  = 56;
+        map <uint32, uint64> map_uint32_uint64 = 57;
+        map <uint32, int32>  map_uint32_int32  = 58;
+        map <uint32, uint32> map_uint32_uint32 = 59;
+        map <uint32, bool>   map_uint32_bool   = 60;
+        map <uint32, string> map_uint32_string = 61;
+        map <uint32, bytes>  map_uint32_bytes  = 62;
+
+        // Map String Standard
+        map <string, google.protobuf.Duration>  map_string_duration    = 63;
+        map <string, google.protobuf.Timestamp> map_string_timestamp   = 64;
+        map <string, weave.common.ResourceId>   map_string_resource_id = 65;
+
+        // Map String Non Standard
+        map <string, TestZInternalStruct>                map_string_struct_internal = 66;
+        map <string, TestZTypespace.TestZExternalStruct> map_string_struct_external = 67;
+
+        // Map String Enum
+        map <string, TestZInternalEnum>                map_string_enum_internal = 68;
+        map <string, TestZTypespace.TestZExternalEnum> map_string_enum_external = 69;
+
+        // Map UInt32 Primitive
+        map <string, float>  map_string_float  = 70;
+        map <string, double> map_string_double = 71;
+        map <string, int64>  map_string_int64  = 72;
+        map <string, uint64> map_string_uint64 = 73;
+        map <string, int32>  map_string_int32  = 74;
+        map <string, uint32> map_string_uint32 = 75;
+        map <string, bool>   map_string_bool   = 76;
+        map <string, string> map_string_string = 77;
+        map <string, bytes>  map_string_bytes  = 78;
+
+        // Other
+        weave.common.DayOfWeek day_of_week = 79;
+        weave.common.StringRef string_ref  = 80;
+
+        // Comment slash-slash
+        bool slash_slash_comment = 81;
+
+        /// Comment slash-slash-slash
+        bool slash_slash_slash_comment = 82;
+
+        /**
+         *  Comment block
+         *  block
+         *  block
+         *
+         *      - indented block
+         *          - indented block
+         *          - indented block
+         *          - indented block
+         *      - indented block
+         */
+        bool block_comment = 83;
+
+        // Deprecated
+        bool deprecated = 84 [deprecated = true];
+
+        // Reserved
+        bool abstract = 85;
+        // The name 'assert' collides with protoc C++ codegen
+        // bool assert = 86;
+        reserved 86;
+        bool const = 87;
+        bool description = 88;
+        bool for = 89;
+        bool id = 90;
+        bool is = 91;
+        bool protected = 92;
+    }
+}

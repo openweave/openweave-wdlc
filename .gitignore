@@ -1,0 +1,8 @@
+.local-version
+autom4te.cache
+build/results/
+config.log
+config.status
+include/stamp-h1
+include/wdlc-config.h
+Makefile

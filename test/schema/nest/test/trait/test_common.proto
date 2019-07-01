@@ -1,0 +1,54 @@
+syntax = "proto3";
+package nest.test.trait;
+
+option objc_class_prefix = "SCM";
+
+import "wdl/wdl_options.proto";
+
+message TestCommon {
+    option (wdl.message_type) = TYPESPACE;
+    option (wdl.typespace) = {
+        vendor_id: NEST,
+        version: 2,
+        stability: BETA
+    };
+
+    enum CommonEnumA {
+        option (wdl.enumopts) = {
+            extendable: true,
+            reserved_tag_min: 1,
+            reserved_tag_max: 31
+        };
+
+        COMMON_ENUM_A_UNSPECIFIED = 0;
+        COMMON_ENUM_A_VALUE_1 = 1;
+        COMMON_ENUM_A_VALUE_2 = 2;
+        COMMON_ENUM_A_VALUE_3 = 3;
+    }
+
+    enum CommonEnumE {
+        option (wdl.enumopts) = {
+            extendable: true,
+            reserved_tag_min: 1,
+            reserved_tag_max: 31
+        };
+
+        COMMON_ENUM_E_UNSPECIFIED = 0;
+        COMMON_ENUM_E_VALUE_1 = 1;
+        COMMON_ENUM_E_VALUE_2 = 2;
+        COMMON_ENUM_E_VALUE_3 = 3;
+    }
+
+
+    message CommonStructE {
+        option (wdl.message_type) = STRUCT;
+        option (wdl.structopts) = {
+            extendable: true,
+            reserved_tag_min: 1,
+            reserved_tag_max: 31
+        };
+
+        uint32 se_a = 1;
+        bool se_b = 2;
+    }
+}

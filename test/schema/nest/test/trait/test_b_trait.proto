@@ -1,0 +1,105 @@
+/*
+ *
+ * TestTraitB
+ *
+ * This trait exercises a couple of features for code-gen:
+ *  - Extension of trait properties
+ *  - Extension of enumerants (TODO)
+ *  - Extension of structures
+ */
+
+syntax = "proto3";
+package nest.test.trait;
+
+import "google/protobuf/timestamp.proto";
+import "wdl/wdl_options.proto";
+import "nest/test/trait/test_a_trait.proto";
+import "weave/common/string_ref.proto";
+import "weave/common/identifiers.proto";
+import "google/protobuf/duration.proto";
+import "google/protobuf/wrappers.proto";
+import "weave/common/time.proto";
+import "nest/test/trait/test_common.proto";
+
+option java_outer_classname = "WeaveTestTraitB";
+option objc_class_prefix = "SCM";
+
+message TestBTrait {
+    option (wdl.message_type) = TRAIT;
+    option (wdl.trait) = {
+        vendor_id: NEST,
+        id: 0xFE01,
+        version: 2,
+        stability: ALPHA
+    };
+
+    message StructB {
+        option (wdl.message_type) = STRUCT;
+
+        string sb_a = 1;
+        uint32 sb_b = 2;
+    }
+
+     // TODO: This doesn't compile yet due to a bug in the compiler
+
+     // enum EnumEA {
+     //    option (wdl.enumopts) = {
+     //        extends: "test.trait.common.CommonEnumA"
+     //    };
+
+     //    ENUMEA_UNSPECIFIED = 0;
+     //    ENUMEA_VALUE_4 = 32;
+     //    ENUMEA_VALUE_5 = 33;
+     // }
+
+    message StructEA {
+        option (wdl.message_type) = STRUCT;
+        option (wdl.structopts) = {
+            extends: "nest.test.trait.TestATrait.StructA"
+        };
+
+        // ---- Base Struct ---- //
+        google.protobuf.UInt32Value sa_a = 1 [(wdl.prop) = {nullable: true, ephemeral: true}];
+        bool sa_b = 2;
+
+        // ----- Extended Struct ---- //
+        string sea_c = 32;
+    }
+
+    // ---- Base Trait ---- //
+    TestATrait.EnumA ta_a = 1;
+    TestCommon.CommonEnumA ta_b = 2;
+    uint32 ta_c = 3 [(wdl.prop) = {optional: true}];
+    TestATrait.StructA ta_d = 4 [(wdl.prop) = {nullable: true, ephemeral: true}];
+    repeated uint32 ta_e = 5;
+
+    weave.common.StringRef ta_g = 8;
+    repeated TestATrait.StructA ta_h = 10 [(wdl.prop) = {writable: READ_ONLY}];
+    map <uint32, uint32> ta_i = 11 [(wdl.keyprop) = {uint_constraints: {width: 16}}];
+    map <uint32, TestATrait.StructA> ta_j = 12 [(wdl.keyprop) = {uint_constraints: {width: 16}}];
+    bytes ta_k = 14;
+    repeated weave.common.DayOfWeek ta_l = 15;
+
+    weave.common.ResourceId ta_m = 16 [(wdl.prop) = {resource_type: RESOURCE_TYPE_DEVICE, nullable: true}]; // Explicit resource-id
+    weave.common.ResourceId ta_n = 9 [(wdl.prop) = {nullable: true}]; // Implicit resource-id
+
+    google.protobuf.Timestamp ta_o = 7 [(wdl.prop) = {timestamp_constraints: {signed: false, precision: 1, width: 32}}];
+    google.protobuf.Timestamp ta_p = 17[(wdl.prop) = {timestamp_constraints: {signed: true, precision: 0.001, width: 64}, nullable: true}];
+
+    google.protobuf.Duration ta_q = 18 [(wdl.prop) = {duration_constraints: {signed: true, precision: 0.001, width: 64}}];
+    google.protobuf.Duration ta_r = 19 [(wdl.prop) = {duration_constraints: {signed: false, precision: 1, width: 32}}];
+    google.protobuf.Duration ta_s = 20 [(wdl.prop) = {duration_constraints: {signed: false, precision: 0.001, width: 32}, nullable: true}];
+
+    // Boxed Types
+    google.protobuf.UInt32Value ta_t = 13 [(wdl.prop) = {nullable: true, ephemeral: true}];
+    google.protobuf.Int32Value ta_u = 21[(wdl.prop) = {nullable: true}];
+    google.protobuf.BoolValue ta_v = 22 [(wdl.prop) = {nullable: true}];
+    google.protobuf.StringValue ta_w = 23 [(wdl.prop) = {nullable: true}];
+    google.protobuf.FloatValue ta_x = 24 [(wdl.prop) = {nullable: true, number_constraints: {min: -50.5, max: 50.5, precision: .1, fixed_encoding_width: 16}}, (wdl.tlv) = { encoding: FIXED }];
+
+    // ----- Extended Trait ---- //
+    uint32 tb_a = 32;
+    StructB tb_b = 33;
+    StructEA tb_c = 34;
+    //EnumEA tb_d = 35;
+}

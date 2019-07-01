@@ -1,0 +1,71 @@
+/*
+ *
+ *    Copyright (c) 2019 Google LLC.
+ *    Copyright (c) 2016-2018 Nest Labs, Inc.
+ *    All rights reserved.
+ *
+ *    Licensed under the Apache License, Version 2.0 (the "License");
+ *    you may not use this file except in compliance with the License.
+ *    You may obtain a copy of the License at
+ *
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *    Unless required by applicable law or agreed to in writing, software
+ *    distributed under the License is distributed on an "AS IS" BASIS,
+ *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *    See the License for the specific language governing permissions and
+ *    limitations under the License.
+ */
+
+/**
+ *    @file
+ *      This file defines a common Weave Data Language (WDL) type for
+ *      a customer-facing readable string which may * need
+ *      localization.
+ *
+ */
+
+syntax = "proto3";
+package weave.common;
+
+import "wdl/wdl_options.proto";
+
+option java_outer_classname = "WeaveInternalStringRef";
+option objc_class_prefix = "SCM";
+
+/**
+ * The common type for a customer-facing readable string which may 
+ * need localization.
+ *
+ * Any human-readable string which is communicated from a trait host 
+ * and will be customer facing should be represented as a StringRef, 
+ * which can be an identifier into a localizable String Table trait.  
+ * For example, the name and vendor name of a device are likely 
+ * localizable. This enables the recipient of the StringRef value to 
+ * look up the string value appropriate for the end client's locale setting.
+*/
+message StringRef {
+  option (wdl.message_type) = UNION;
+
+  oneof string_ref {
+    /// A single, non-localizable literal string
+    string literal = 1;
+
+    /**
+     * Reserved for future use.
+     * A reference to a string in a string table, which must be
+     * looked up in a StringTable trait.
+     *
+     * The bottom 2 bytes form the string identifier in the table.
+     *
+     * The upper two bytes must be zero, and indicates this id refers 
+     * to the single StringTable trait instance on this resource.  
+     * Non-zero values are reserved for a future mechanism for 
+     * addressing external StringTables.
+     */
+    uint32 reference = 2;
+
+    // Reserved for future string substitution definition
+    // StringSub substitution = 3;
+  }
+}

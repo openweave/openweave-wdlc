@@ -1,0 +1,62 @@
+/*
+ *
+ * TestFTrait
+ *
+ * This trait exercises float number constraints.
+ */
+
+syntax = "proto3";
+package nest.test.trait;
+
+option objc_class_prefix = "SCM";
+
+import "wdl/wdl_options.proto";
+import "google/protobuf/wrappers.proto";
+
+message TestFTrait {
+    option (wdl.message_type) = TRAIT;
+    option (wdl.trait) = {
+        vendor_id: NEST,
+        id: 0xFE07,
+        version: 1,
+        stability: ALPHA,
+    };
+
+    google.protobuf.FloatValue tf_p_a = 1 [(wdl.prop) = { optional: true,
+                                                          nullable: true,
+                                                          number_constraints: {
+                                                              min: 0.0, max: 1000.0, 
+                                                              precision: 0.001, 
+                                                              fixed_encoding_width: 32 }},
+                                           (wdl.tlv)  = { encoding: FIXED } ];
+
+    message TestFEvent {
+        option (wdl.message_type) = EVENT;
+        option (wdl.event) = {
+            id: 1,
+            event_importance: EVENT_IMPORTANCE_PRODUCTION_STANDARD,
+        };
+
+        float tf_a = 1 [(wdl.param) = {number_constraints: {min: -256,
+                                                            max: 255.99,
+                                                            precision: 0.01,
+                                                            fixed_encoding_width: 16}},
+                        (wdl.tlv) = { encoding: FIXED }];
+        float tf_b = 2 [(wdl.param) = {number_constraints: {min: -512,
+                                                            max: 511,
+                                                            precision: 1,
+                                                            fixed_encoding_width: 16}},
+                        (wdl.tlv) = { encoding: FIXED }];
+        float tf_c = 3 [(wdl.param) = {number_constraints: {min: 1.180591620717411303e+21,
+                                                            max: 1.180591620717411304e+21,
+                                                            precision: 1,
+                                                            fixed_encoding_width: 16}},
+                        (wdl.tlv) = { encoding: FIXED }];
+        float tf_d = 4 [(wdl.param) = {number_constraints: {min: -256,
+                                                            max: 255.99,
+                                                            precision: 0.01,
+                                                            fixed_encoding_width: 16}},
+                        (wdl.tlv) = { encoding: FIXED }];
+    }
+
+}

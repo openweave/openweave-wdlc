@@ -1,0 +1,632 @@
+/*
+ *
+ *    Copyright (c) 2019 Google LLC.
+ *    Copyright (c) 2016-2018 Nest Labs, Inc.
+ *    All rights reserved.
+ *
+ *    Licensed under the Apache License, Version 2.0 (the "License");
+ *    you may not use this file except in compliance with the License.
+ *    You may obtain a copy of the License at
+ *
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *    Unless required by applicable law or agreed to in writing, software
+ *    distributed under the License is distributed on an "AS IS" BASIS,
+ *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *    See the License for the specific language governing permissions and
+ *    limitations under the License.
+ */
+
+/**
+ *    @file
+ *      This file defines core Weave Data Lanaguage (WDL) command,
+ *      event, interface, property, resource, and trait constraints,
+ *      options, and qualities.
+ *
+ */
+
+syntax = "proto2";
+package wdl;
+
+import "google/protobuf/descriptor.proto";
+import "google/protobuf/any.proto";
+import "google/protobuf/duration.proto";
+import "google/protobuf/timestamp.proto";
+import public "wdl/data_access.proto";
+import public "wdl/vendors.proto";
+import "weave/common/units.proto";
+import "weave/common/resource_type.proto";
+
+option java_outer_classname = "WdlInternalWdlOptions";
+option objc_class_prefix = "SCM";
+
+enum MessageType {
+  STRUCT = 0;
+  PROPERTIES_DEPRECATED = 1;
+  COMMAND = 2;
+  COMMAND_LIST = 3;
+  EVENT = 4;
+  EVENT_LIST = 5;
+  RESOURCE = 6;
+  IFACE = 7;
+  RESPONSE_EVENT = 8;
+  SERVICE_DESCRIPTION = 9;
+  UNION = 10;
+  TRAIT = 11;
+  UPDATE_PARAMETERS = 12;
+  TYPEDEF = 13;
+  IFACE_IMPLEMENTATIONS = 14;
+  TYPESPACE = 15;
+}
+
+enum PublishedBy {
+  SELF = 0;
+  EXTERNAL = 1;
+}
+
+enum Encoding {
+  ENCODING_UNSPECIFIED = 0;
+  FIXED = 1;
+  FLOAT = 2;
+}
+
+enum Stability {
+  ALPHA = 0;
+  BETA = 1;
+  PROD = 2;
+}
+
+/**
+ * Messages for representing arbitrary structured constant data, for
+ * example for initial, static, and constant values.  These can only
+ * be used in options.
+ */
+message AnyStruct {
+  required string type = 1;
+  repeated AnyValue values = 2;
+}
+
+message AnyValue {
+  required string field_name = 1;
+
+  oneof value {
+    bool bool_val = 2;
+    int64 int_val = 3;
+    uint64 uint_val = 4;
+    double number_val = 5;
+    string string_val = 6;
+    string bytes_base16_val = 7;       /// base-16 encoded bytes
+    string resource_id_val = 8; /// String encoding of a resource id
+    AnyStruct struct_val = 9;
+  }
+}
+
+message TraitVersionAssociation {
+  optional uint32 version = 1;
+  optional uint32 parent_version = 2;
+}
+
+message TraitVersionIdentifier {
+  optional string trait = 1;
+}
+
+message IntegerConstraints {
+  /**
+   * Specifies a different width than the implied proto type width, in
+   * bits.  This allows a compiler to pick a smaller storage size for the value
+   */
+  optional uint32 width = 1;
+  optional int64 max = 2;
+  optional int64 min = 3;
+}
+
+message UnsignedConstraints {
+  /**
+   * Specifies a different width than the implied proto type width, in
+   * bits.  This allows a compiler to pick a smaller storage size for the value
+   */
+  optional uint32 width = 1;
+  optional uint64 max = 2;
+  optional uint64 min = 3;
+}
+
+message NumberConstraints {
+  optional uint32 fixed_encoding_width = 1;
+  optional double max = 2;
+  optional double min = 3;
+  optional double precision = 4;
+}
+
+message TimestampConstraints {
+  optional bool signed = 1;
+  optional double precision = 2;
+  optional uint32 width = 3;
+}
+
+message DurationConstraints {
+  optional bool signed = 1;
+  optional double precision = 2;
+  optional uint32 width = 3;
+}
+
+message StringConstraints {
+  optional uint32 min_length = 1;
+  optional uint32 max_length = 2;
+  optional string allowed_characters = 3;
+  // string regex = 4;  Need to pick a regex standard; Perl, Java, POSIX?
+}
+
+message BytesConstraints {
+  optional uint32 min_length = 1;
+  optional uint32 max_length = 2;
+}
+
+message VersionCompatibleOptions {
+  optional uint32 min_version = 1;  // The minimum version where this capability existed, default is 1 if this option is not specified
+  optional uint32 max_version = 2;  // The last version where this capability existed, default is that the capability still exists
+  repeated uint32 incompatible_versions = 3;  // Any versions where the semantic understanding of the capability has changed and might require a different interpretation
+  optional google.protobuf.Any default_value = 4;  // If specified, the default value for a non-optional property/parameter not supported by a publisher
+}
+
+message WdlCommandOptions {
+  required uint32 id = 1;
+  optional VersionCompatibleOptions compatibility = 3;
+
+  optional bool extendable = 5;
+  optional uint32 reserved_tag_min = 6;
+  optional uint32 reserved_tag_max = 7;
+  optional string extends = 8;          // Name of the COMMAND message this extends
+
+  // Implementation of `result_events` postponed pending use cases
+  // repeated string result_events = 10;
+  optional string completion_event = 11;
+}
+
+message WdlEventOptions {
+  required uint32 id = 1;
+  optional VersionCompatibleOptions compatibility = 3;
+
+  optional bool extendable = 5;
+  optional uint32 reserved_tag_min = 6;
+  optional uint32 reserved_tag_max = 7;
+  optional string extends = 8;          // Name of the EVENT message this extends
+
+  /**
+   * The importance of delivering this event.
+   */
+  required EventImportance event_importance = 9;
+}
+
+/**
+ * Options for qualifying the entire set of properties
+ */
+message WdlPropertiesOptions {
+  optional Variability variability = 3; // All values in this trait can only update on this freq.
+  optional WriteAccess writable = 4;    // All values in this trait have this overriding write access
+
+  optional bool extendable = 5;
+  optional uint32 reserved_tag_min = 6;
+  optional uint32 reserved_tag_max = 7;
+  optional TraitVersionIdentifier extends = 8; // Trait and versions this extends
+}
+
+/**
+ * For qualifying/constraining properties
+ */
+message WdlPropertyOptions {
+  optional Variability variability = 1;  // This property can only update on this freq.
+  optional WriteAccess writable = 2;
+  optional VersionCompatibleOptions compatibility = 3;
+  // uint32 timeout = 4;  // Timeout of updates to a property, in milliseconds. TODO: If revived, consider Duration.
+  optional bool optional = 5;           // Indicates this property is optional, with a specific semantic that must be indicated when the value is not passed in a required context
+  optional bool nullable = 6;           // Indicates this property may be NULL, which means a value is not available
+  optional string update_command = 7; // Indicates a command specifying parameters for updating this property.  The same command may appear on multiple properties
+
+  /// The quantity type of this value, which also implies the unit
+  optional weave.common.QuantityType quantity_type = 20;
+  /// A fixed scaling from the standard unit of the quantity, use rarely.
+  optional double quantity_scale = 21;
+  /// A fixed offset from the standard unit of the quantity, use rarely.
+  optional double quantity_offset = 22;
+
+  optional IntegerConstraints int_constraints = 31;   /// Constraints for integer values
+  optional UnsignedConstraints uint_constraints = 32; /// Constraints for unsigned integer values
+  optional NumberConstraints number_constraints = 33; /// Constraints for float/double values
+  optional StringConstraints string_constraints = 34; /// Constraints for string values
+  optional BytesConstraints bytes_constraints = 35;   /// Constraints for byte values
+  optional TimestampConstraints timestamp_constraints = 36;  /// Constraints for Timestamp values
+  optional DurationConstraints duration_constraints = 37;  /// Constraints for Duration values
+
+  /**
+   *  For ResourceId type values when the type is known, and
+   *  FullTraitInstanceId's, the actual type of the resource
+   */
+  optional weave.common.ResourceType resource_type = 50;
+
+  optional bool ephemeral = 51; // Ephemeral properties allow publishers to 'forget' the value of a property and depend on other caching re-publishers of this information
+                                // in the system to retain its previous value. This should be used sparingly (see specification).
+                                // Ephemeral properties are always nullable, so use nullability in conjunction with this.
+}
+
+/**
+ * For qualifying/constraining parameters on commands or events
+ */
+message WdlParameterOptions {
+  optional bool optional = 1;           // Indicates this property is optional, with a specific semantic that must be indicated when the value is not passed in a required context
+  optional bool nullable = 2;           // Indicates this property may be NULL, which means a value is not available
+  optional VersionCompatibleOptions compatibility = 3;
+
+  /// The quantity type of this value, which also implies the unit
+  optional weave.common.QuantityType quantity_type = 20;
+  /// A fixed scaling from the standard unit of the quantity, use rarely.
+  optional double quantity_scale = 21;
+  /// A fixed offset from the standard unit of the quantity, use rarely.
+  optional double quantity_offset = 22;
+
+  optional IntegerConstraints int_constraints = 31;   /// Constraints for integer values
+  optional UnsignedConstraints uint_constraints = 32; /// Constraints for unsigned integer values
+  optional NumberConstraints number_constraints = 33; /// Constraints for float/double values
+  optional StringConstraints string_constraints = 34; /// Constraints for string values
+  optional BytesConstraints bytes_constraints = 35;   /// Constraints for byte values
+  optional TimestampConstraints timestamp_constraints = 36;  /// Constraints for Timestamp values
+  optional DurationConstraints duration_constraints = 37;  /// Constraints for Duration values
+
+  /**
+   *  For ResourceId type values when the type is known, and
+   *  FullTraitInstanceId's, the actual type of the resource
+   */
+  optional weave.common.ResourceType resource_type = 50;
+}
+
+message WdlEnumOptions {
+  optional bool bitmask = 1;
+  optional bool extendable = 5;
+  optional uint32 reserved_tag_min = 6;
+  optional uint32 reserved_tag_max = 7;
+  optional string extends = 8;           // Name of the ENUM this extends
+
+  /**
+   * If present, this enum is an indicator of non-integer constants, and
+   * every value must include the matching "constant_/type/"
+   * enumvalue option.  When this option is indicated, the tag numbers for
+   * the enum become irrelevant, and should be ignored; they must still include
+   * a "0" value to follow the protobuf enum value rules.
+   *
+   * Allowed values are "bool", "double", "string", "bytes", "resource_id",
+   * or some structured data type indicated by its full namespaced type.  This
+   * can later be expanded to include constant arrays, for example "bool array".
+   *
+   * Currently only resource_id constant is supported.
+   */
+  optional string constant_type = 10;
+
+  optional VersionCompatibleOptions compatibility = 11;
+}
+
+message WdlEnumValueOptions {
+  optional VersionCompatibleOptions compatibility = 3;
+
+  optional bool unknown_fallback = 10;
+  optional uint32 fallback = 11;
+
+
+  /**
+   * Indication of non-integer constant values for an enum.  When the enum
+   * includes the "constant_type" option, each value must contain the matching
+   * option here with a value of that type.  Codegen will then ignore the
+   * numeric tag value and instead generate a constant of this type.
+   *
+   * The int and uint values should only be used for repeated constants, as standard
+   * enums handle those types.
+   *
+   * Repeated allows for both single and lists of constant values to be
+   * specified.
+   *
+   * Only one of these options may be set for a given enum value, and it must
+   * correspond to the constant_type of the enum.
+   */
+  // repeated bool constant_bool = 101;
+  // repeated int64 constant_int = 102;
+  // repeated uint64 constant_uint = 103;
+  // repeated double constant_number = 104;
+  // repeated string constant_string = 105;
+  // repeated bytes constant_bytes = 106;
+  // repeated AnyStruct constant_struct = 107;
+  repeated string constant_resource_id = 108;
+}
+
+message WdlTlvOptions {
+  optional Encoding encoding = 1;
+}
+
+/**
+ * Options which are specified on a trait instance in a resource definition,
+ * for further constraining properties of that trait.  This includes whether
+ * an optional field is actually implemented, log level, tighter constraints on
+ * the value itself, and static values for the fields.
+ */
+message WdlPropertyRefinement {
+  /**
+   * Name of the property with options being refined
+   */
+  required string property = 1;
+
+  /**
+   * Indicates that a particular optional property is not actually
+   * implemented on a given resource.  This option can only be specified
+   * on a trait instance property that is marked optional in the trait
+   * definition.
+   */
+  optional bool unimplemented = 3;
+
+  /**
+   * Any refinement of constraints on a trait instance, which must be
+   * more constrained than any constraints on the parameter in the trait
+   * definition.  Must match the type of the property.
+   */
+  oneof constraints {
+    IntegerConstraints int_constraints = 31;   /// Constraints for integer values
+    UnsignedConstraints uint_constraints = 32; /// Constraints for unsigned integer values
+    NumberConstraints number_constraints = 33; /// Constraints for float/double values
+    StringConstraints string_constraints = 34; /// Constraints for string values
+    BytesConstraints bytes_constraints = 35;   /// Constraints for byte values
+    TimestampConstraints timestamp_constraints = 36;  /// Constraints for Timestamp values
+    DurationConstraints duration_constraints = 37;  /// Constraints for Duration values
+  }
+
+  /**
+   * Indication of static property values on a resource.  Repeated allows for
+   * both single and value lists to be statically specified.
+   * Only one of these values may be set for a given property, and it must
+   * correspond to the type of the property.
+   */
+  repeated bool static_bool_value = 101;
+  repeated int64 static_int_value = 102;
+  repeated uint64 static_uint_value = 103;
+  repeated double static_number_value = 104;
+  repeated string static_string_value = 105;
+  repeated bytes static_bytes_base16_value = 106;
+  repeated AnyStruct static_struct_value = 107;
+  repeated string static_resource_id_value = 108;
+
+  /**
+   * Indication of initial property values on a resource.  These override
+   * any initial values that are indicated for a property on a trait
+   * definition.
+   *
+   * Repeated allows for both single and lists of initial values to be
+   * specified.
+   *
+   * Only one of these values may be set for a given property, and it must
+   * correspond to the type of the property.
+   */
+  repeated bool initial_bool_value = 121;
+  repeated int64 initial_int_value = 122;
+  repeated uint64 initial_uint_value = 123;
+  repeated double initial_number_value = 124;
+  repeated string initial_string_value = 125;
+  repeated bytes initial_bytes_base16_value = 126;
+  repeated AnyStruct initial_struct_value = 127;
+  repeated string initial_resource_id_value = 128;
+  repeated google.protobuf.Duration initial_duration_value = 129;
+  repeated google.protobuf.Timestamp initial_timestamp_value = 130;
+  // The name of the initial enum value
+  repeated string initial_enum_value_name = 131;
+}
+
+message WdlParameterRefinement {
+  required string parameter = 1;  /// Name of the parameter being refined
+
+  /**
+   * Any refinement of constraints on a trait instance, which must be
+   * more constrained than any constraints on the parameter in the trait
+   * definition.  Must match the type of the parameter.
+   */
+  oneof constraints {
+    IntegerConstraints int_constraints = 31;   /// Constraints for integer values
+    UnsignedConstraints uint_constraints = 32; /// Constraints for unsigned integer values
+    NumberConstraints number_constraints = 33; /// Constraints for float/double values
+    StringConstraints string_constraints = 34; /// Constraints for string values
+    BytesConstraints bytes_constraints = 35;   /// Constraints for byte values
+    TimestampConstraints timestamp_constraints = 36;  /// Constraints for Timestamp values
+    DurationConstraints duration_constraints = 37;  /// Constraints for Duration values
+  }
+}
+
+/**
+ * Options which are specified on a trait instance in a resource definition,
+ * for further constraining commands of that trait.  This includes tighter
+ * constraints on parameters of the command.
+ */
+message WdlCommandRefinement {
+  required string command = 1;   /// Name of the command being refined
+
+  repeated WdlParameterRefinement parameters = 2;  /// Parameters to refine
+}
+
+/**
+ * Options which are specified on a trait instance in a resource definition,
+ * for further constraining events of that trait.  This includes tighter
+ * constraints on parameters emitted by the event, and different level of
+ * logging.
+ */
+message WdlEventRefinement {
+  required string event = 1;   /// Name of the event being refined
+
+  repeated WdlParameterRefinement parameters = 2;  /// Parameters to refine
+
+  /**
+   * The importance of delivering this event for this resource, overriding
+   * that specified within the trait/event.
+   */
+  optional EventImportance event_importance = 4;
+}
+
+message WdlTraitInstOptions {
+  // Collection of traits that forms a logical subcomponent
+  optional uint32 instance = 3;
+}
+
+message WdlTraitInstConfig {
+  // If this trait is managed by a remote service, or this
+  required PublishedBy published_by = 1;
+  // If this trait is published by self, if it is also proxied by a remote resource proxy
+  optional bool proxied = 2;
+  // If this is published remotely, whether this will also subscribe to it
+  optional bool subscribed = 3;
+
+  optional uint32 min_version = 4;
+
+  repeated WdlPropertyRefinement prop_refinement = 10;
+  repeated WdlCommandRefinement command_refinement = 11;
+  repeated WdlEventRefinement event_refinement = 12;
+}
+
+message WdlIfaceTraitInstOptions {
+  optional uint32 min_version = 1;
+}
+
+message TraitVersionIds {
+  optional uint32 version = 1;
+  optional int32 id = 2;
+}
+
+message WdlVersionEntry {
+  required string name = 1;
+  required uint32 version = 2;
+}
+
+message WdlTraitVersionMapEntry {
+  required uint32 parent_version = 1;
+  repeated WdlVersionEntry dependent_version_list = 2;
+}
+
+message WdlTraitOptions {
+  required int32 id = 1;
+  required Vendor vendor_id = 3;
+  optional uint32 version = 4;
+  optional PublishedBy published_by = 5;
+  optional bool extendable = 6;
+  required Stability stability = 7;
+  repeated WdlTraitVersionMapEntry version_map = 8;
+
+  optional uint32 reserved_command_tag_min = 10;
+  optional uint32 reserved_command_tag_max = 11;
+  optional uint32 reserved_event_tag_min = 12;
+  optional uint32 reserved_event_tag_max = 13;
+}
+
+message WdlTypespaceOptions {
+  required Vendor vendor_id = 3;
+  optional uint32 version = 4;
+
+  // optional PublishedBy published_by = 5;
+  // optional bool extendable = 6;
+  required Stability stability = 7;
+
+  repeated WdlTraitVersionMapEntry version_map = 8;
+}
+
+message WdlStructOptions {
+  optional bool extendable = 5;
+  optional uint32 reserved_tag_min = 6;
+  optional uint32 reserved_tag_max = 7;
+  optional string extends = 8;           // Name of the STRUCT message this extends
+
+  optional VersionCompatibleOptions compatibility = 3;
+}
+
+message TraitMapping {
+  required string from = 1;
+  required string to = 2;
+}
+
+message WdlImplementsOptions {
+  optional string iface = 1;
+  repeated TraitMapping trait_mapping = 2;
+  optional uint32 min_version = 3;
+}
+
+message WdlImplementationOptions {
+  repeated TraitMapping trait_mapping = 2;
+}
+
+message WdlResourceVersionEntry {
+  required uint32 resource_version = 1;
+  repeated WdlVersionEntry trait_version_list = 2;
+  repeated WdlVersionEntry iface_version_list = 3;
+}
+
+message WdlResourceOptions {
+  required Vendor vendor_id = 1;
+  optional uint32 version = 2;
+  optional weave.common.ResourceType resource_type = 3;
+  optional uint32 vendor_product_id = 5;    // For devices only - this is the product ID used for pairing
+  required Stability stability = 6;
+  repeated WdlResourceVersionEntry version_map = 7;
+}
+
+message WdlIfaceOptions {
+  optional int32 id = 1;
+  required Vendor vendor_id = 2;
+  optional uint32 version = 3;
+  required Stability stability = 4;
+  repeated WdlTraitVersionMapEntry version_map = 5;
+}
+
+message WdlInterfaceOptions {
+  optional int32 id = 1;
+  optional int32 vendor_id = 2;
+  optional uint32 version = 3;
+}
+
+message WdlServiceOptions {
+  optional string config = 1;
+  optional WdlTraitOptions trait = 2;
+  optional WdlResourceOptions resource = 3;
+}
+
+// Options to configure the Caspian Pipeline.
+// Please talk with kevincp@ before using these options.
+message CaspianOptions {
+  // Ignore this field in Caspian pipeline. The use of this field is intended to be
+  // temporary to allow for devices to emit fields in BETA/PROD stability that will
+  // later be removed. If unset, it is assumed false.
+  optional bool ignore = 1;
+}
+
+extend google.protobuf.MessageOptions {
+  optional MessageType message_type = 60000;         // What this message type is conveying
+  optional WdlCommandOptions command = 60001;        // Can only appear in a command message
+  optional WdlEventOptions event = 60002;            // Can only appear in an event message
+  optional WdlPropertiesOptions properties = 60003;  // Can only appear in a state message
+  optional WdlStructOptions structopts = 60004;      // Can only appear in a state message
+  optional WdlTraitOptions trait = 60005;            // Can only appear in a trait message
+  optional WdlResourceOptions resource = 60006;      // Can only appear in a resource message
+  optional WdlIfaceOptions iface = 60007;            // Can only appear in an interface message
+  optional WdlTypespaceOptions typespace = 60008;    // Can only appear in a typespace message
+}
+
+extend google.protobuf.FieldOptions {
+  optional WdlPropertyOptions prop = 60000;        /// Can only appear on a trait property field
+  optional WdlPropertyOptions keyprop = 60001;     /// Can only appear on a trait field that is a map
+  optional WdlParameterOptions param = 60002;      /// Can only appear on command or event parameters
+  optional WdlTraitInstOptions traitinst = 60003;  /// Can only appear on a trait instance in a resource
+  optional WdlTraitInstConfig traitconfig = 60004; /// Can only appear on a trait intannce in a resource
+  optional WdlTlvOptions tlv = 60005;
+  optional WdlIfaceTraitInstOptions traitiface = 60006; /// Can only appear on a trait instance of an interface
+  optional WdlImplementsOptions implconfig = 60007;      /// Can only appear on an instance of an interface
+  optional CaspianOptions caspian_options = 60008;  ///Please talk to kevincp@ before using these options.
+}
+
+extend google.protobuf.EnumOptions {
+  optional WdlEnumOptions enumopts = 60000;
+}
+
+extend google.protobuf.EnumValueOptions {
+  optional WdlEnumValueOptions enumvalue = 60000;
+}
+
+extend google.protobuf.ServiceOptions {
+  optional WdlServiceOptions service = 60000;
+}

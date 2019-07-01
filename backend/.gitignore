@@ -1,0 +1,16 @@
+.*.swp
+/bazel-bin
+/bazel-genfiles
+/bazel-out
+/bazel-phoenix-apps-codegen
+/bazel-testlogs
+/src/config.h
+/src/ctemplate
+/src/stamp-h1
+/proto-test
+.idea/
+venv/
+build/
+dist/
+*.egg*
+venv/

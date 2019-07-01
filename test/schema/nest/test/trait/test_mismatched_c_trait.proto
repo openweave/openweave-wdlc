@@ -1,0 +1,77 @@
+/*
+ *
+ * TestTraitC
+ *
+ * This trait exercises a couple of features for code-gen:
+ *   - Versioning
+ */
+
+syntax = "proto3";
+package nest.test.trait;
+
+import "wdl/wdl_options.proto";
+
+option java_outer_classname = "WeaveTestMismatchedTraitC";
+option objc_class_prefix = "SCM";
+
+
+
+message TestMismatchedCTrait {
+    option (wdl.message_type) = TRAIT;
+
+    // Note: this file captures a subsequent version of trait C -- it
+    // adds a field to the StructC and it adds a new top-level
+    // property.  For the purposes of Weave, we need to generate a
+    // different file with a different set of names.  Prior to copying
+    // those over into Weave, please ensure that the trait ID below is
+    // altered to match that of the TestCTrait -- 0xFE03.
+    option (wdl.trait) = {
+        vendor_id: NEST,
+        id: 0xFEF3,
+           version: 3,
+        stability: ALPHA,
+    };
+
+    message StructC {
+        option (wdl.message_type) = STRUCT;
+        option (wdl.structopts) = {
+            extendable: true,
+            reserved_tag_min: 1,
+            reserved_tag_max: 31
+        };
+
+        uint32 sc_a = 1;
+        bool sc_b = 2;
+
+        // TODO: IDL doesn't support revising structures just yet.
+        uint32 sc_c = 3;
+        //[(wdl.structvalue) = {compatibility: {min_version: 3}}];
+    }
+
+    enum EnumC {
+        option (wdl.enumopts) = {
+            extendable: true ,
+            reserved_tag_min: 1,
+            reserved_tag_max: 32
+        };
+
+        ENUM_C_UNSPECIFIED = 0;
+        ENUM_C_VALUE_1 = 1;
+        ENUM_C_VALUE_2 = 2;
+        ENUM_C_VALUE_3 = 3 [(wdl.enumvalue) = {compatibility: {min_version: 2}}];
+    }
+
+    // ----------- PROPERTIES ----------- //
+    option (wdl.properties) = {
+        writable: READ_ONLY,
+        extendable: true,
+        reserved_tag_min: 1,
+        reserved_tag_max: 31
+    };
+
+    bool tc_a = 1;
+    EnumC tc_b = 2;
+    StructC tc_c = 3;
+    uint32 tc_d = 4 [(wdl.prop) = {compatibility: {min_version: 2}}];
+    StructC tc_e = 5 [(wdl.prop) = {compatibility: {min_version: 3}}];
+}

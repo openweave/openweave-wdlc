@@ -1,0 +1,37 @@
+/*
+ *
+ * TestZResource
+ *
+ */
+syntax = "proto3";
+package nest.test.resource;
+
+option objc_class_prefix = "SCM";
+
+import "nest/test/iface/test_z_iface.proto";
+import "nest/test/trait/test_z_trait.proto";
+import "wdl/wdl_options.proto";
+
+message TestZResource {
+    option (wdl.message_type) = RESOURCE;
+    option (wdl.resource) = {
+        stability: ALPHA,
+        vendor_id: NEST,
+        version: 2
+    };
+
+    // TestZIface Traits
+    nest.test.trait.TestZTrait trait_one = 1 [(wdl.traitconfig) = {published_by: SELF, proxied: true, subscribed: false},
+                                              (wdl.traitinst) = {instance: 0}];
+
+    // Traits
+    nest.test.trait.TestZTrait trait_two = 2 [(wdl.traitconfig) = {published_by: SELF, proxied: true, subscribed: false},
+                                              (wdl.traitinst) = {instance: 1}];
+
+    // Ifaces
+    message Implements {
+        option (wdl.message_type) = IFACE_IMPLEMENTATIONS;
+
+        nest.test.iface.TestZIface iface = 1;
+    }
+}

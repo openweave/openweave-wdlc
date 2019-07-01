@@ -1,0 +1,165 @@
+/*
+ *
+ * TestTraitA
+ *
+ * This trait exercises a couple of features for code-gen:
+ *  - Enumerant definitions (within multiple name-spaces)
+ *  - Instantiation of multiple basic types
+ *  - Structure type messages
+ *  - IDL standard types
+ *  - Optionality/Nullability
+ */
+
+syntax = "proto3";
+package nest.test.trait;
+
+import "google/protobuf/timestamp.proto";
+import "wdl/wdl_options.proto";
+import "nest/test/trait/test_common.proto";
+import "weave/common/string_ref.proto";
+import "weave/common/identifiers.proto";
+import "weave/common/time.proto";
+import "google/protobuf/duration.proto";
+import "google/protobuf/wrappers.proto";
+
+option java_outer_classname = "WeaveTestTraitA";
+option objc_class_prefix = "SCM";
+
+
+message TestATrait {
+    option (wdl.message_type) = TRAIT;
+    option (wdl.trait) = {
+        vendor_id: NEST,
+        id: 0xFE00,
+        version: 2,
+        stability: BETA
+    };
+
+    message StructA {
+        option (wdl.message_type) = STRUCT;
+        option (wdl.structopts) = {
+            extendable: true,
+            reserved_tag_min: 1,
+            reserved_tag_max: 31
+        };
+
+        google.protobuf.UInt32Value sa_a = 1 [(wdl.prop) = {nullable: true, ephemeral: true}];
+        bool sa_b = 2;
+    }
+
+    enum EnumA {
+        option (wdl.enumopts) = {
+            extendable: true ,
+            reserved_tag_min: 1,
+            reserved_tag_max: 32
+        };
+
+        ENUM_A_UNSPECIFIED = 0;
+        ENUM_A_VALUE_1 = 1;
+        ENUM_A_VALUE_2 = 2;
+        ENUM_A_VALUE_3 = 3;
+    }
+
+    enum EnumAA {
+        option (wdl.enumopts) = {
+            extendable: true ,
+            reserved_tag_min: 1,
+            reserved_tag_max: 32
+        };
+
+        ENUM_AA_UNSPECIFIED = 0;
+        ENUM_AA_VALUE_1 = 1;
+        ENUM_AA_VALUE_2 = 2;
+        ENUM_AA_VALUE_3 = 3;
+    }
+
+    // ----------- CONSTANTS ----------- //
+    enum ConstantA {
+        option (wdl.enumopts) = {
+            constant_type: "resource_id"
+        };
+
+        CONSTANT_A_VALUE_1 = 0 [(wdl.enumvalue) = {constant_resource_id: "DEVICE_00000000"}];
+        CONSTANT_A_VALUE_2 = 1 [(wdl.enumvalue) = {constant_resource_id: "USER_00000001"}];
+        CONSTANT_A_VALUE_3 = 2 [(wdl.enumvalue) = {constant_resource_id: "ACCOUNT_00000002"}];
+        CONSTANT_A_VALUE_4 = 3 [(wdl.enumvalue) = {constant_resource_id: "AREA_00000003"}];
+        CONSTANT_A_VALUE_5 = 4 [(wdl.enumvalue) = {constant_resource_id: "FIXTURE_00000004"}];
+        CONSTANT_A_VALUE_6 = 5 [(wdl.enumvalue) = {constant_resource_id: "GROUP_00000005"}];
+        CONSTANT_A_VALUE_7 = 6 [(wdl.enumvalue) = {constant_resource_id: "ANNOTATION_00000006"}];
+        CONSTANT_A_VALUE_8 = 7 [(wdl.enumvalue) = {constant_resource_id: "STRUCTURE_1122334455667788"}];
+    }
+
+    // ----------- PROPERTIES ----------- //
+    option (wdl.properties) = {
+        writable: READ_ONLY,
+        extendable: true,
+        reserved_tag_min: 1,
+        reserved_tag_max: 31
+    };
+
+    EnumA ta_a = 1;
+    TestCommon.CommonEnumA ta_b = 2;
+    uint32 ta_c = 3 [(wdl.prop) = {optional: true}];
+    StructA ta_d = 4 [(wdl.prop) = {nullable: true, ephemeral: true}];
+    repeated uint32 ta_e = 5;
+
+    weave.common.StringRef ta_g = 8;
+    repeated StructA ta_h = 10 [(wdl.prop) = {writable: READ_ONLY}];
+    map <uint32, uint32> ta_i = 11 [(wdl.keyprop) = {uint_constraints: {width: 16}}];
+    map <uint32, StructA> ta_j = 12 [(wdl.keyprop) = {uint_constraints: {width: 16}}];
+    bytes ta_k = 14;
+    repeated weave.common.DayOfWeek ta_l = 15;
+
+    weave.common.ResourceId ta_m = 16 [(wdl.prop) = {resource_type: RESOURCE_TYPE_DEVICE, nullable: true}]; // Explicit resource-id
+    weave.common.ResourceId ta_n = 9 [(wdl.prop) = {nullable: true}]; // Implicit resource-id
+
+    google.protobuf.Timestamp ta_o = 7 [(wdl.prop) = {timestamp_constraints: {signed: false, precision: 1, width: 32}}];
+    google.protobuf.Timestamp ta_p = 17[(wdl.prop) = {timestamp_constraints: {signed: true, precision: 0.001, width: 64}, nullable: true}];
+
+    google.protobuf.Duration ta_q = 18 [(wdl.prop) = {duration_constraints: {signed: true, precision: 0.001, width: 64}}];
+    google.protobuf.Duration ta_r = 19 [(wdl.prop) = {duration_constraints: {signed: false, precision: 1, width: 32}}];
+    google.protobuf.Duration ta_s = 20 [(wdl.prop) = {duration_constraints: {signed: false, precision: 0.001, width: 32}, nullable: true}];
+
+    // Boxed Types
+    google.protobuf.UInt32Value ta_t = 13 [(wdl.prop) = {nullable: true, ephemeral: true}];
+    google.protobuf.Int32Value ta_u = 21[(wdl.prop) = {nullable: true}];
+    google.protobuf.BoolValue ta_v = 22 [(wdl.prop) = {nullable: true}];
+    google.protobuf.StringValue ta_w = 23 [(wdl.prop) = {nullable: true}];
+    google.protobuf.FloatValue ta_x = 24 [(wdl.prop) = {nullable: true, number_constraints: {min: -50.5, max: 50.5, precision: .1, fixed_encoding_width: 16}}, (wdl.tlv) = { encoding: FIXED }];
+
+    // ----------- COMMANDS ----------- //
+
+    // Request with no custom response
+    message CommandARequest {
+        option (wdl.message_type) = COMMAND;
+        option (wdl.command) = {
+            id: 0x01
+        };
+
+        uint32 a = 1;
+        bool b = 2;
+    }
+
+    // Request with custom response
+    message CommandBRequest {
+        option (wdl.message_type) = COMMAND;
+        option (wdl.command) = {
+            id: 0x02,
+            completion_event: "CommandBResponse"
+        };
+
+        uint32 a = 1;
+        bool b = 2;
+    }
+
+    // Response
+    message CommandBResponse {
+        option (wdl.message_type) = RESPONSE_EVENT;
+
+        uint32 a = 1;
+        bool b = 2;
+    }
+}
+
+
+

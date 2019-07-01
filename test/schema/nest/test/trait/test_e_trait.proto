@@ -1,0 +1,151 @@
+/*
+ *
+ * TestTraitE
+ *
+ * This trait exercises event features for code-gen:
+ *   - Includes almost all types found in current events as of June 2016 aside
+ *      from oneof and optional/nullable
+ */
+
+syntax = "proto3";
+package nest.test.trait;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/wrappers.proto";
+import "wdl/wdl_options.proto";
+import "nest/test/trait/test_common.proto";
+import "weave/common/time.proto";
+import "google/protobuf/duration.proto";
+import "weave/common/identifiers.proto";
+
+option java_outer_classname = "WeaveTestTraitE";
+option objc_class_prefix = "SCM";
+
+
+message TestETrait {
+    option (wdl.message_type) = TRAIT;
+    option (wdl.trait) = {
+        vendor_id: NEST,
+        id: 0xFE06,
+        version: 2,
+        stability: ALPHA,
+    };
+
+    // ----------- PROPERTIES ----------- //
+    option (wdl.properties) = {
+        writable: READ_ONLY,
+        extendable: true,
+        reserved_tag_min: 1,
+        reserved_tag_max: 31
+    };
+
+    message StructE {
+        option (wdl.message_type) = STRUCT;
+        option (wdl.structopts) = {
+            extendable: true,
+            reserved_tag_min: 1,
+            reserved_tag_max: 31
+        };
+
+        uint32 se_a = 1;
+        bool se_b = 2;
+        TestCommon.CommonEnumE se_c = 3;
+    }
+
+    message NullableE {
+        option (wdl.message_type) = STRUCT;
+        option (wdl.structopts) = {
+            extendable: true,
+            reserved_tag_min: 1,
+            reserved_tag_max: 31
+        };
+
+        google.protobuf.UInt32Value ne_a = 1 [(wdl.prop) = {nullable: true}];
+        google.protobuf.BoolValue ne_b = 2 [(wdl.prop) = {nullable: true}];
+    }
+
+    enum EnumE {
+        option (wdl.enumopts) = {
+            extendable: true ,
+            reserved_tag_min: 1,
+            reserved_tag_max: 31
+        };
+
+        ENUM_E_UNSPECIFIED = 0;
+        ENUM_E_VALUE_1 = 1;
+        ENUM_E_VALUE_2 = 2;
+        ENUM_E_VALUE_3 = 3;
+        ENUM_E_VALUE_4 = 4 [(wdl.enumvalue) = {compatibility: {min_version: 2}}];
+    }
+
+
+    message TestEEvent {
+        option (wdl.message_type) = EVENT;
+        option (wdl.event) = {
+          id: 1,
+          event_importance: EVENT_IMPORTANCE_PRODUCTION_STANDARD,
+          extendable: true,
+          reserved_tag_min: 1,
+          reserved_tag_max: 31
+        };
+
+        uint32 te_a = 1;
+        int32 te_b = 2;
+        bool te_c = 3;
+        EnumE te_d = 4;
+        StructE te_e = 5;
+        TestCommon.CommonEnumE te_f = 6;
+        TestCommon.CommonStructE te_g = 7;
+        repeated uint32 te_h = 8;
+        repeated TestCommon.CommonStructE te_i = 9;
+        google.protobuf.FloatValue te_j = 10 [(wdl.param) = {optional: true,
+                                                             nullable: true,
+                                                             number_constraints: {min: -100.5,
+                                                                                  max: 100.5,
+                                                                                  precision: .1,
+                                                                                  fixed_encoding_width: 16}},
+                                              (wdl.tlv) = { encoding: FIXED }];
+
+        bytes te_k = 13;
+        repeated weave.common.DayOfWeek te_l = 14;
+
+        weave.common.ResourceId te_m = 15 [(wdl.param) = {resource_type: RESOURCE_TYPE_DEVICE, nullable: true}]; // Explicit resource-id
+        weave.common.ResourceId te_n = 16 [(wdl.param) = {nullable: true}]; // Implicit resource-id
+
+        google.protobuf.Timestamp te_o = 17 [(wdl.param) = {timestamp_constraints: {signed: false, precision: 1, width: 32}}];
+        google.protobuf.Timestamp te_p = 18[(wdl.param) = {timestamp_constraints: {signed: true, precision: 0.001, width: 64}, nullable: true}];
+
+        google.protobuf.Duration te_q = 19 [(wdl.param) = {duration_constraints: {signed: true, precision: 0.001, width: 64}}];
+        google.protobuf.Duration te_r = 20 [(wdl.param) = {duration_constraints: {signed: false, precision: 1, width: 32}}];
+        google.protobuf.Duration te_s = 21 [(wdl.param) = {duration_constraints: {signed: false, precision: 0.001, width: 32}, nullable: true}];
+
+        uint32 te_t = 22 [(wdl.param) = {compatibility: {min_version: 2}}];
+    }
+
+    message TestENullableEvent {
+        option (wdl.message_type) = EVENT;
+        option (wdl.event) = {
+          id: 2,
+          event_importance: EVENT_IMPORTANCE_PRODUCTION_STANDARD,
+          extendable: true,
+          reserved_tag_min: 1,
+          reserved_tag_max: 31
+        };
+
+        google.protobuf.UInt32Value ne_a = 1 [(wdl.param) = {nullable: true}];
+        google.protobuf.Int32Value ne_b = 2 [(wdl.param) = {nullable: true}];
+        google.protobuf.BoolValue ne_c = 3 [(wdl.param) = {nullable: true}];
+        google.protobuf.StringValue ne_d = 4 [(wdl.param) = {nullable: true}];
+        google.protobuf.FloatValue ne_e = 5 [(wdl.param) = {nullable: true,
+                                                            number_constraints: {min: -50.5,
+                                                                                 max: 50.5,
+                                                                                 precision: .1,
+                                                                                 fixed_encoding_width: 16}},
+                                             (wdl.tlv) = { encoding: FIXED }];
+        google.protobuf.UInt32Value ne_f = 6 [(wdl.param) = {nullable: true}];
+        google.protobuf.Int32Value ne_g = 7 [(wdl.param) = {nullable: true}];
+        google.protobuf.BoolValue ne_h = 8 [(wdl.param) = {nullable: true}];
+        google.protobuf.StringValue ne_i = 9 [(wdl.param) = {nullable: true}];
+        NullableE ne_j = 10 [(wdl.param) = {nullable: true}];
+    }
+}

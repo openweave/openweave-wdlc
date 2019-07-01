@@ -1,0 +1,60 @@
+/*
+ *
+ * TestTraitD
+ *
+ * This trait exercises a couple of features for code-gen:
+ *   - Both extensions and versions at the same time.
+ */
+
+syntax = "proto3";
+package nest.test.trait;
+
+import "google/protobuf/timestamp.proto";
+import "wdl/wdl_options.proto";
+import "nest/test/trait/test_c_trait.proto";
+import "nest/test/trait/test_common.proto";
+import "nest/test/trait/test_common_versioned.proto";
+
+option java_outer_classname = "WeaveTestTraitD";
+option objc_class_prefix = "SCM";
+
+message TestDTrait {
+    option (wdl.message_type) = TRAIT;
+    option (wdl.trait) = {
+        vendor_id: NEST,
+        id: 0xFE05,
+        version: 2,
+        stability: ALPHA,
+        version_map: [
+          {
+             parent_version: 2, dependent_version_list: [
+               {name: "nest.test.trait.TestCommonVersioned", version: 2},
+               {name: "nest.test.trait.TestCTrait", version: 2}
+             ]
+          }
+        ]
+    };
+
+    // ----------- PROPERTIES ----------- //
+    option (wdl.properties) = {
+        writable: READ_ONLY,
+        extendable: true,
+        reserved_tag_min: 32,
+        reserved_tag_max: 63,
+        extends: {
+            trait: "nest.test.trait.TestCTrait"
+        }
+    };
+
+    // ---- Base Trait ---- //
+    bool tc_a = 1;
+    TestCTrait.EnumC tc_b = 2;
+    TestCTrait.StructC tc_c = 3;
+    uint32 tc_d = 4 [(wdl.prop) = {compatibility: {min_version: 2}}];
+    TestCommonVersioned.CommonEnumE tc_e = 5;
+
+    // ---- Extended Trait ---- //
+    string td_d = 32;
+    int32 td_e = 33;
+    bool td_f = 34 [(wdl.prop) = {compatibility: {min_version: 2}}];
+}

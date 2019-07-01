@@ -1,0 +1,101 @@
+/*
+ *
+ *    Copyright (c) 2019 Google LLC.
+ *    Copyright (c) 2016-2018 Nest Labs, Inc.
+ *    All rights reserved.
+ *
+ *    Licensed under the Apache License, Version 2.0 (the "License");
+ *    you may not use this file except in compliance with the License.
+ *    You may obtain a copy of the License at
+ *
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *    Unless required by applicable law or agreed to in writing, software
+ *    distributed under the License is distributed on an "AS IS" BASIS,
+ *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *    See the License for the specific language governing permissions and
+ *    limitations under the License.
+ */
+
+/**
+ *    @file
+ *      This file defines common Weave Data Lanaguage (WDL) date and
+ *      time enumerations and types.
+ *
+ */
+
+syntax = "proto3";
+package weave.common;
+
+import "wdl/wdl_options.proto";
+import "google/protobuf/duration.proto";
+import "google/protobuf/timestamp.proto";
+
+option java_outer_classname = "WeaveInternalTime";
+option objc_class_prefix = "SCM";
+
+/*
+ * TODO Example
+ */
+/**
+ * An up-counting timer, with a basis at a particular UTC time
+ * If time is positive, then this is an unbounded incrementing timer
+ * If time is negative, then this is time remaining until the time reaches zero
+ * Current value for time would then be (currentUTCTime - timeBasis + time)
+ */
+message Timer {
+  google.protobuf.Duration time = 1 [(wdl.prop) = {duration_constraints: {signed: true,
+                                                                          precision: 0.001,
+                                                                          width: 64}}];
+
+  google.protobuf.Timestamp time_basis = 2 [(wdl.prop) = {timestamp_constraints: {signed: true,
+                                                                                  precision:0.001,
+                                                                                  width:64}}];
+}
+
+enum DayOfWeek {
+  option (wdl.enumopts) = {bitmask: true};
+  
+  DAY_OF_WEEK_UNSPECIFIED = 0;
+  DAY_OF_WEEK_SUNDAY      = 0x01;
+  DAY_OF_WEEK_MONDAY      = 0x02;
+  DAY_OF_WEEK_TUESDAY     = 0x04;
+  DAY_OF_WEEK_WEDNESDAY   = 0x08;
+  DAY_OF_WEEK_THURSDAY    = 0x10;
+  DAY_OF_WEEK_FRIDAY      = 0x20;
+  DAY_OF_WEEK_SATURDAY    = 0x40;
+}
+
+enum MonthOfYear {
+  MONTH_OF_YEAR_UNSPECIFIED = 0;
+  MONTH_OF_YEAR_JANUARY     = 0x001;
+  MONTH_OF_YEAR_FEBRUARY    = 0x002;
+  MONTH_OF_YEAR_MARCH       = 0x004;
+  MONTH_OF_YEAR_APRIL       = 0x008;
+  MONTH_OF_YEAR_MAY         = 0x010;
+  MONTH_OF_YEAR_JUNE        = 0x020;
+  MONTH_OF_YEAR_JULY        = 0x040;
+  MONTH_OF_YEAR_AUGUST      = 0x080;
+  MONTH_OF_YEAR_SEPTEMBER   = 0x100;
+  MONTH_OF_YEAR_OCTOBER     = 0x200;
+  MONTH_OF_YEAR_NOVEMBER    = 0x400;
+  MONTH_OF_YEAR_DECEMBER    = 0x800;
+}
+
+/**
+ * TimeOfDay
+ * Indicates a time of day relative to midnight, generally in local time.
+ */
+message TimeOfDay {
+  /// Hour since midnight, 0-23
+  uint32 hour = 5 [(wdl.prop) = {
+                       uint_constraints: {width: 8, min: 0, max: 23}}];;
+
+  /// minute, 0-59. Optional, if absent value is 0
+  uint32 minute = 6 [(wdl.prop) = {optional: true, 
+                       uint_constraints: {width: 8, min: 0, max: 59}}];;
+
+  /// second, 0-59.  Optional, if absent value is 0
+  uint32 second = 7 [(wdl.prop) = {optional: true, 
+                       uint_constraints: {width: 8, min: 0, max: 59}}];;
+}
