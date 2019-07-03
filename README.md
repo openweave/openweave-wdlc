@@ -1,7 +1,7 @@
 [![OpenWeave][ow-logo]][ow-wdlc-repo]
 <br/>
 <br/>
-[![Build Status][ow-core-travis-svg]][ow-wdlc-travis]
+[![Build Status][ow-wdlc-travis-svg]][ow-wdlc-travis]
 
 ---
 
