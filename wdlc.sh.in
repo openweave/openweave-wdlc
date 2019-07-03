@@ -271,7 +271,7 @@ function remove_proto_descriptor_set() {
 #
 function protoc_generate_code() {
     local template_dir="${1}"
-    local template_files=$(find ${template_dir}/* ! -name "*~" | tr '\n' ':' | sed 's/:$//')
+    local template_files=$(find ${template_dir} ! -type d ! -name "*~" | tr '\n' ':' | sed 's/:$//')
     local output_directory="${2}"
     local command="${PROTOC} \
         --plugin=protoc-gen-wdl=${wdlc_libdir}/wdl_plugin \
@@ -279,6 +279,15 @@ function protoc_generate_code() {
         --wdl_out=${output_directory} \
         ${protoc_search_path_options} \
         ${input_paths}"
+
+    # Ensure that there were actually template files found in the
+    # specified template directory.
+
+    if [ -z "${template_files}" ]; then
+        echo "No code generation template files found in '${template_dir}'!" >&2
+
+        exit 1
+    fi
 
     # Generate, if not dry-running, the code.
 
