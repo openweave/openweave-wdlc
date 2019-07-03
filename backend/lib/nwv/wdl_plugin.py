@@ -69,6 +69,9 @@ def codegen(request, response):
   codegen_reference_mode = ('codegen_reference_mode' in args and
                                 args['codegen_reference_mode'].lower() == 'true')
 
+  if args['templates'] is None or not args['templates']:
+    raise Exception('wdl_plugin: \'templates\' argument is empty')
+
   if isinstance(args['templates'], list):
     template_files = args['templates']
   else:
