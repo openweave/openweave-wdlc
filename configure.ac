@@ -134,6 +134,99 @@ NL_PATH_PROG(SED, sed, [sed is required to build wdlc])
 # other minimum requirements.
 
 #
+# Python
+#
+
+# We have validated that Python 2.7 seems to work suitably with
+# WDLC. However, there are, at present, portability issues with some
+# of the Python infrastructure in the WDLC backend that preclude the
+# use of Python 3. Ensure that the Python requested is within that
+# version range, inclusive.
+
+nl_python_major_minor_version_min="2.7"
+nl_python_major_minor_version_max="2.7"
+
+# Provide some documentation in 'configure --help' that informs the
+# user that 'PYTHON=<python executable> configure' or 'configure
+# PYTHON=<python executable' will work to specify precisely which
+# python executable to use.
+
+AC_ARG_VAR(PYTHON, [Python executable])
+
+# Check whether 'python' exists in the current PATH, and if it does,
+# set PYTHON to the fully-qualified, absolute path for it. If the user
+# has already set PYTHON, either by 'PYTHON=<python executable>
+# configure' or 'configure PYTHON=<python executable>', then this
+# check is does nothing.
+
+AC_PATH_PROG(PYTHON, python)
+
+# Check the configure cache and, failing that, check the python
+# executable for what version it claims to be, saving the result in
+# the cache for faster, future reconfiguration runs.
+
+AC_CACHE_CHECK([${PYTHON} version],
+	       nl_cv_python_version,
+               [
+                   nl_cv_python_version=`${PYTHON} --version 2>&1 | ${SED} -n -e 's/^.\{1,\}\([[0-9]]\{1,\}.[[0-9]]\{1,\}.[[0-9]]\{1,\}\)$/\1/gp'`
+
+                   if test "${nl_cv_python_version}" = "" ; then
+                       nl_cv_python_version="unknown"
+                   fi
+               ])
+
+# Check the configure cache and, failing that, check directly whether
+# the reported python version is greater than or equal to the minimum,
+# using a clever sed and sort trick to indicate 'yes' or 'no'.
+
+AC_CACHE_CHECK([${PYTHON} version is at least ${nl_python_major_minor_version_min}],
+               nl_cv_python_version_at_least_major_minor,
+               [
+                   nl_python_major_minor_version=`echo ${nl_cv_python_version} | ${SED} -n -e 's/^\([[0-9]]\{1,\}.[[0-9]]\{1,\}\).[[0-9]]\{1,\}$/\1/gp'`
+
+                   nl_cv_python_version_at_least_major_minor=`printf "${nl_python_major_minor_version_min}\n${nl_python_major_minor_version}\n" | ${SED} 's/^ *//' | sort | ${SED} "s/${nl_python_major_minor_version_min}/yes/ ; s/${nl_python_major_minor_version}/no/ ; 1q"`
+               ])
+
+# Check the configure cache and, failing that, check directly whether
+# the reported python version is lesser than or equal to the maximum,
+# using a clever sed and sort trick to indicate 'yes' or 'no'.
+
+AC_CACHE_CHECK([${PYTHON} version is at most ${nl_python_major_minor_version_max}],
+               nl_cv_python_version_at_most_major_minor,
+               [
+                   nl_python_major_minor_version=`echo ${nl_cv_python_version} | ${SED} -n -e 's/^\([[0-9]]\{1,\}.[[0-9]]\{1,\}\).[[0-9]]\{1,\}$/\1/gp'`
+
+                   nl_cv_python_version_at_most_major_minor=`printf "${nl_python_major_minor_version}\n${nl_python_major_minor_version_max}\n" | ${SED} 's/^ *//' | sort | ${SED} "s/${nl_python_major_minor_version}/yes/ ; s/${nl_python_major_minor_version_max}/no/ ; 1q"`
+               ])
+
+# If the version of python that the user specified is out of the
+# allowed range, then fail out with an error message.
+
+if test "${nl_cv_python_version_at_least_major_minor}" = "no" || test "${nl_cv_python_version_at_most_major_minor}" = "no"; then
+    if test "${nl_python_major_minor_version_min}" = "${nl_python_major_minor_version_max}"; then
+        msg="${nl_python_major_minor_version_min}"
+    else
+        msg="later than or equal to ${nl_python_major_minor_version_min} or earlier than or equal to ${nl_python_major_minor_version_max}"
+    fi
+
+    AC_MSG_ERROR([Python version ${msg} is required. However, ${PYTHON} is version ${nl_cv_python_version}.])
+fi
+
+# Emit the python version detected as PYTHON_VERSION in makefiles.
+
+AC_SUBST(PYTHON_VERSION, ${nl_cv_python_version})
+
+# Check whether Python PIP is installed.
+
+NL_CHECK_PYTHON_MODULE([pip],
+                       [https://pip.pypa.io/en/stable/installing/ and https://docs.python.org/2/library/ensurepip.html])
+
+# Check whether Python Virtual Environment is installed.
+
+NL_CHECK_PYTHON_MODULE([virtualenv],
+                       [https://virtualenv.pypa.io/en/stable/installation])
+
+#
 # Google Protocol Buffers (protobuf) Compiler (protoc)
 #
 
@@ -275,6 +368,20 @@ fi
 # location where protoc sources its headers from, respecting PROTOC_INCLUDES
 # if the user specified it.
 
+# Effect a Python-based workalike equavalent to GNU readlink -f, which
+# will not exist on pure POSIX or BSD sytems like Darwin / Mac OS X.
+
+readlink_f() {
+    ${PYTHON} -c "import os,sys; print(os.path.expanduser(os.path.realpath(sys.argv[[1]])))" "${1}"
+}
+
+# Ultimately, we want to resolve the real location of protoc (hence
+# the 'readlink_f' below), no matter what symbolic link to it might
+# exist, such that we can intuit the location of its header
+# directory. When protoc is a symbolic link, either relative or
+# absolute, the header directory likely will not share the same
+# directory stem as the symbolic link.
+
 AC_CACHE_CHECK([where ${PROTOC} sources its headers from],
 	       nl_cv_protoc_includes,
 	       [
@@ -282,7 +389,7 @@ AC_CACHE_CHECK([where ${PROTOC} sources its headers from],
                        nl_maybe_protoc_includes="${PROTOC_INCLUDES}"
 
                    else
-                       protoc_dirname=`dirname $(which ${PROTOC})`
+                       protoc_dirname=`dirname $(readlink_f "${PROTOC}")`
                        nl_maybe_protoc_includes="${protoc_dirname}/../include"
 
                    fi
@@ -305,99 +412,6 @@ AC_SUBST(PROTOC_VERSION, ${nl_cv_protoc_version})
 # Emit the protoc header file directory as PROTOC_INCLUDES in makefiles.
 
 AC_SUBST(PROTOC_INCLUDES, ${nl_cv_protoc_includes})
-
-#
-# Python
-#
-
-# We have validated that Python 2.7 seems to work suitably with
-# WDLC. However, there are, at present, portability issues with some
-# of the Python infrastructure in the WDLC backend that preclude the
-# use of Python 3. Ensure that the Python requested is within that
-# version range, inclusive.
-
-nl_python_major_minor_version_min="2.7"
-nl_python_major_minor_version_max="2.7"
-
-# Provide some documentation in 'configure --help' that informs the
-# user that 'PYTHON=<python executable> configure' or 'configure
-# PYTHON=<python executable' will work to specify precisely which
-# python executable to use.
-
-AC_ARG_VAR(PYTHON, [Python executable])
-
-# Check whether 'python' exists in the current PATH, and if it does,
-# set PYTHON to the fully-qualified, absolute path for it. If the user
-# has already set PYTHON, either by 'PYTHON=<python executable>
-# configure' or 'configure PYTHON=<python executable>', then this
-# check is does nothing.
-
-AC_PATH_PROG(PYTHON, python)
-
-# Check the configure cache and, failing that, check the python
-# executable for what version it claims to be, saving the result in
-# the cache for faster, future reconfiguration runs.
-
-AC_CACHE_CHECK([${PYTHON} version],
-	       nl_cv_python_version,
-               [
-                   nl_cv_python_version=`${PYTHON} --version 2>&1 | ${SED} -n -e 's/^.\{1,\}\([[0-9]]\{1,\}.[[0-9]]\{1,\}.[[0-9]]\{1,\}\)$/\1/gp'`
-
-                   if test "${nl_cv_python_version}" = "" ; then
-                       nl_cv_python_version="unknown"
-                   fi
-               ])
-
-# Check the configure cache and, failing that, check directly whether
-# the reported python version is greater than or equal to the minimum,
-# using a clever sed and sort trick to indicate 'yes' or 'no'.
-
-AC_CACHE_CHECK([${PYTHON} version is at least ${nl_python_major_minor_version_min}],
-               nl_cv_python_version_at_least_major_minor,
-               [
-                   nl_python_major_minor_version=`echo ${nl_cv_python_version} | ${SED} -n -e 's/^\([[0-9]]\{1,\}.[[0-9]]\{1,\}\).[[0-9]]\{1,\}$/\1/gp'`
-
-                   nl_cv_python_version_at_least_major_minor=`printf "${nl_python_major_minor_version_min}\n${nl_python_major_minor_version}\n" | ${SED} 's/^ *//' | sort | ${SED} "s/${nl_python_major_minor_version_min}/yes/ ; s/${nl_python_major_minor_version}/no/ ; 1q"`
-               ])
-
-# Check the configure cache and, failing that, check directly whether
-# the reported python version is lesser than or equal to the maximum,
-# using a clever sed and sort trick to indicate 'yes' or 'no'.
-
-AC_CACHE_CHECK([${PYTHON} version is at most ${nl_python_major_minor_version_max}],
-               nl_cv_python_version_at_most_major_minor,
-               [
-                   nl_python_major_minor_version=`echo ${nl_cv_python_version} | ${SED} -n -e 's/^\([[0-9]]\{1,\}.[[0-9]]\{1,\}\).[[0-9]]\{1,\}$/\1/gp'`
-
-                   nl_cv_python_version_at_most_major_minor=`printf "${nl_python_major_minor_version}\n${nl_python_major_minor_version_max}\n" | ${SED} 's/^ *//' | sort | ${SED} "s/${nl_python_major_minor_version}/yes/ ; s/${nl_python_major_minor_version_max}/no/ ; 1q"`
-               ])
-
-# If the version of python that the user specified is out of the
-# allowed range, then fail out with an error message.
-
-if test "${nl_cv_python_version_at_least_major_minor}" = "no" || test "${nl_cv_python_version_at_most_major_minor}" = "no"; then
-    if test "${nl_python_major_minor_version_min}" = "${nl_python_major_minor_version_max}"; then
-        msg="${nl_python_major_minor_version_min}"
-    else
-        msg="later than or equal to ${nl_python_major_minor_version_min} or earlier than or equal to ${nl_python_major_minor_version_max}"
-    fi
-
-    AC_MSG_ERROR([Python version ${msg} is required. However, ${PYTHON} is version ${nl_cv_python_version}.])
-fi
-
-# Emit the python version detected as PYTHON_VERSION in makefiles.
-
-AC_SUBST(PYTHON_VERSION, ${nl_cv_python_version})
-
-# Check whether Python PIP is installed.
-
-NL_CHECK_PYTHON_MODULE([pip],
-                       [https://pip.pypa.io/en/stable/installing/ and https://docs.python.org/2/library/ensurepip.html])
-
-# Check whether Python Virtual Environment is installed.
-
-NL_CHECK_PYTHON_MODULE([virtualenv],
-                       [https://virtualenv.pypa.io/en/stable/installation])
 
 #
 # Tests
