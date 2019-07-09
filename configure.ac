@@ -394,7 +394,7 @@ AC_CACHE_CHECK([where ${PROTOC} sources its headers from],
 
                    fi
 
-                   path_to_match=google/protobuf/compiler/plugin.proto
+                   path_to_match=google/protobuf/descriptor.proto
 
                    if test -f "${nl_maybe_protoc_includes}/${path_to_match}"; then
                        nl_cv_protoc_includes="`echo ${nl_maybe_protoc_includes} | ${SED} -e 's,[[^/]]*/\.\.,,g' -e 's,\/*$,,g' -e 's,\([[^/]]\)\/\/\([[^/]]\),\1/\2,g'`"
