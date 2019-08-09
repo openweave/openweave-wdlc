@@ -88,6 +88,8 @@ function usage() {
         echo "                                       schema that can be used in place of "
         echo "                                       schema in a future invocation, or used "
         echo "                                       for version validation using the"
+        echo "  --output-dependency-file FILE        Emit dependency file information that is compatible"
+        echo "                                       with make for the given input to FILE"
         echo "                                       --previous-intermediate-in option."
         echo "  -o, --output DIR                     Generate code to the output directory"
         echo "  -q, --quiet                          Work silently; do not display diagnostic"
@@ -233,11 +235,19 @@ function gwvc_compare_schema_versions() {
 #
 function protoc_generate_proto_descriptor_set() {
     local descriptor_set_path="${1}"
+    local dependency_file_path="${2}"
+    local dependency_option=""
+
+    if [ -n "${2}" ] ; then
+        dependency_option="--dependency_out ${2}"
+    fi
+
     local command="${PROTOC} \
         --include_source_info \
         --include_imports \
         ${protoc_search_path_options} \
         --descriptor_set_out=${descriptor_set_path} \
+        ${dependency_option} \
         ${input_paths}"
 
     # Generate, if not dry-running, the protobuf file set descriptor
@@ -362,6 +372,7 @@ should_dry_run=0
 template_dir=""
 template_arg=""
 verbose=0
+dependency_file_path=""
 
 while [ "${#}" -gt 0 ]; do
 
@@ -422,6 +433,11 @@ while [ "${#}" -gt 0 ]; do
 
         --output-intermediate)
             intermediate_output_path=${2}
+            shift 2
+            ;;
+
+        --output-dependency-file)
+            dependency_file_path=${2}
             shift 2
             ;;
 
@@ -627,7 +643,7 @@ if [ ${mode} = "check"  ] || [ ${mode} = "codegen" ]; then
     # in the specified protobuf file set descriptor binary.
 
     if [ "${input_format}" == "source" ]; then
-        protoc_generate_proto_descriptor_set "${current_proto_descriptor_set_path}"
+        protoc_generate_proto_descriptor_set "${current_proto_descriptor_set_path}" "${dependency_file_path}"
     fi
 
     # Drive, if not dry-running, the gwvc back-end to generate
