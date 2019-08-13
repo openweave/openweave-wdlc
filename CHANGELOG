@@ -1,3 +1,8 @@
+1.0.2 (2019-08-13)
+
+        * Address GitHub-flagged Jinja2 issue by increasing the minimum
+          required Jinja2 version to at least 2.10.1.
+
 1.0.1 (2019-07-03)
 
         * Improve the error handling and resulting error reporting for the -g | --gen option.
