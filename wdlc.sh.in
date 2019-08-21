@@ -598,8 +598,6 @@ if [ -d "${intermediate_output_path}" ]; then
     usage 1 "${wdlc_datadir}"
 fi
 
-protoc_search_path_options="--proto_path ${wdlc_includedir}"
-
 # The template argument for code generation is either a short-cut to a
 # wdlc-internal directory or an absolute or relative path to an
 # external template directory. Attempt to form the former and
@@ -637,6 +635,10 @@ if [ ${#protoc_search_paths[@]} -gt 0 ]; then
         protoc_search_path_options+=" --proto_path ${protoc_search_path}"
     done
 fi
+
+# We append the compiler-specific include path after to allow for the user to specify paths
+# that can over-ride the content provided by the installed compiler (e.g test traits)
+protoc_search_path_options+=" --proto_path ${wdlc_includedir}"
 
 # If the input points to a directory, convert it to specify the set of proto files in them instead.
 if [ -d "${input_paths}" ]; then
