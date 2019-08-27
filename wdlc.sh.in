@@ -274,6 +274,18 @@ function remove_proto_descriptor_set() {
 }
 
 #
+# generate_temp_proto_descriptor_set output_directory
+#
+# Generates a dummy descriptor binary file with a randomized name
+#
+function generate_temp_proto_descriptor_set() {
+    local output_dir="${1}"
+    local command="mktemp ${output_dir}/proto-descriptor-set-XXXXXX.proto.bin"
+
+    maybe_run_or_dry_run ${command}
+}
+
+#
 # fixup_dependency_file <file-name> <target> <emit-phony-target>
 #
 # Fixes up the dependency file emitted by protoc to be compliant with
@@ -684,7 +696,7 @@ fi
 # A randomly generated file name will be vended for intermediate descriptor - this ensures that wdlc can be
 # invoked in parallel without having colliding descriptor binaries.
 if [ -z "${current_proto_descriptor_set_path}" ]; then
-    current_proto_descriptor_set_path=$(mktemp proto-descriptor-set-XXXXXX.proto.bin)
+    current_proto_descriptor_set_path=$(generate_temp_proto_descriptor_set "${output_dir}")
 fi
 
 # Whether we are checking / validating the schema corpus or running
