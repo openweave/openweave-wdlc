@@ -560,10 +560,6 @@ else
     echo "note: running protoc, '${PROTOC}', specified from the environment via PROTOC rather than 'protoc'."
 fi
 
-# By default, randomly generate the file name for the intermediate descriptor. This ensures that wdlc can be
-# invoked in parallel without having colliding descriptor binaries.
-proto_descriptor_set_name="proto-descriptor-set-$(cat /dev/urandom | tr -cd 'a-f0-9' | head -c 32).proto.bin"
-
 current_proto_descriptor_set_path=""
 previous_proto_descriptor_set_path=""
 
@@ -587,8 +583,6 @@ if [ "${input_format}" == "intermediate" ]; then
 elif [ "${input_format}" == "source" ]; then
     if [ -n "${intermediate_output_path}" ]; then
         current_proto_descriptor_set_path="${intermediate_output_path}"
-    else
-        current_proto_descriptor_set_path="${output_dir}/${proto_descriptor_set_name}"
     fi
 else
     echo "Invalid input format option"
@@ -684,6 +678,13 @@ fi
 if [ -n "${dependency_file_path}" ] && [ ! -n "${dependency_file_target}" ]; then
     echo "A target must be specified through the -MT option!"
     usage 1
+fi
+
+# If a path hasn't been specified yet so far for the intermediate binary, we pick one by default.
+# A randomly generated file name will be vended for intermediate descriptor - this ensures that wdlc can be
+# invoked in parallel without having colliding descriptor binaries.
+if [ -z "${current_proto_descriptor_set_path}" ]; then
+    current_proto_descriptor_set_path=$(mktemp proto-descriptor-set-XXXXXX.proto.bin)
 fi
 
 # Whether we are checking / validating the schema corpus or running
