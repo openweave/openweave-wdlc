@@ -560,7 +560,9 @@ else
     echo "note: running protoc, '${PROTOC}', specified from the environment via PROTOC rather than 'protoc'."
 fi
 
-proto_descriptor_set_name="proto-descriptor-set.proto.bin"
+# By default, randomly generate the file name for the intermediate descriptor. This ensures that wdlc can be
+# invoked in parallel without having colliding descriptor binaries.
+proto_descriptor_set_name="proto-descriptor-set-$(cat /dev/urandom | tr -cd 'a-f0-9' | head -c 32).proto.bin"
 
 current_proto_descriptor_set_path=""
 previous_proto_descriptor_set_path=""
