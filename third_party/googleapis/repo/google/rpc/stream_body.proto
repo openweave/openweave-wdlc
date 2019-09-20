@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package google.rpc;
+
+import "google/rpc/status.proto";
+
+option objc_class_prefix = "RPC";
+
+// StreamBody represents the request or response of a streamed RPC method
+// when the RPC method is invoked over a byte-stream L7 protocol such as HTTP.
+message StreamBody {
+  // Each message is a byte array which contains a serialized protobuf message.
+  repeated bytes messages = 1;
+
+  // An optional status which is sent when a stream is closed.
+  google.rpc.Status status = 2;
+
+  // Opaque binary data not to be consumed or produced by the application.
+  // Noop messages may be generated as base64 padding (for browsers) or
+  // as a way to keep the connection alive. Its tag-id is reserved as the
+  // maximum value allowed for a single-byte tag-id
+  repeated bytes noop = 15;
+}

@@ -156,7 +156,7 @@ OUTPUTDIR=""
 project=google/googleapis
 branch_or_commit=""
 branch_or_commit_option=""
-googleapis_files=( "LICENSE" "google/api/annotations.proto" "google/api/http.proto" "google/longrunning/operations.proto" "google/rpc/code.proto" "google/rpc/error_details.proto" "google/rpc/status.proto" "google/type/color.proto" "google/type/date.proto" "google/type/dayofweek.proto" "google/type/latlng.proto" "google/type/money.proto" "google/type/timeofday.proto" );
+googleapis_files=( "LICENSE" "google/api/annotations.proto" "google/api/http.proto" "google/longrunning/operations.proto" "google/rpc/code.proto" "google/rpc/error_details.proto" "google/rpc/status.proto" "google/rpc/stream_body.proto" "google/type/color.proto" "google/type/date.proto" "google/type/dayofweek.proto" "google/type/latlng.proto" "google/type/money.proto" "google/type/timeofday.proto" );
 verbose=1
 
 # While there are command line options and arguments to parse, parse
