@@ -84,7 +84,6 @@ EXTRA_DIST                                                         = \
     lib/nwv/validators/test_nullable_validator.py                    \
     lib/nwv/validators/test_number_constraints_validator.py          \
     lib/nwv/validators/test_one_byte_field_tag_validator.py          \
-    lib/nwv/validators/test_read_write_validator.py                  \
     lib/nwv/validators/test_removed_object_validator.py              \
     lib/nwv/validators/test_stability_reference_validator.py         \
     lib/nwv/validators/test_stability_validator.py                   \
