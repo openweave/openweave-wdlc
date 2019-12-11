@@ -64,4 +64,12 @@ const nl::SchemaFieldDescriptor {{struct.base_name}}::FieldSchema =
     .mFields = {{struct.base_name}}FieldDescriptors,
     .mSize = sizeof({{struct.base_name}})
 };
+{% else %}
+const nl::SchemaFieldDescriptor {{struct.base_name}}::FieldSchema =
+{
+    .mNumFieldDescriptorElements = 0,
+    .mFields = NULL,
+    .mSize =  sizeof({{struct.base_name}})
+};
+
 {% endif %}
