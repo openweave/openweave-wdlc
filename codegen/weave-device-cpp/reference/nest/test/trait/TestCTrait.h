@@ -30,7 +30,6 @@
 #include <Weave/Profiles/data-management/DataManagement.h>
 #include <Weave/Support/SerializationUtils.h>
 
-#include <nest/test/trait/TestCommonVersioned.h>
 
 
 namespace Schema {
@@ -87,14 +86,9 @@ enum {
     kPropertyHandle_TcD = 7,
 
     //
-    //  tc_e                                nest.test.trait.TestCommonVersioned.CommonEnumE int               NO              NO
-    //
-    kPropertyHandle_TcE = 8,
-
-    //
     // Enum for last handle
     //
-    kLastSchemaHandle = 8,
+    kLastSchemaHandle = 7,
 };
 
 //

@@ -28,7 +28,6 @@ message TestDTrait {
         version_map: [
           {
              parent_version: 2, dependent_version_list: [
-               {name: "nest.test.trait.TestCommonVersioned", version: 2},
                {name: "nest.test.trait.TestCTrait", version: 2}
              ]
           }
@@ -51,7 +50,6 @@ message TestDTrait {
     TestCTrait.EnumC tc_b = 2;
     TestCTrait.StructC tc_c = 3;
     uint32 tc_d = 4 [(wdl.prop) = {compatibility: {min_version: 2}}];
-    TestCommonVersioned.CommonEnumE tc_e = 5;
 
     // ---- Extended Trait ---- //
     string td_d = 32;
