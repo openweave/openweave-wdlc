@@ -511,6 +511,26 @@ inline bool TestENullableEvent::IsNeJPresent(void)
 }
 #endif
 
+struct TestEEmptyEvent
+{
+
+    static const nl::SchemaFieldDescriptor FieldSchema;
+
+    // Statically-known Event Struct Attributes:
+    enum {
+            kWeaveProfileId = (0x235aU << 16) | 0xfe06U,
+        kEventTypeId = 0x3U
+    };
+
+    static const nl::Weave::Profiles::DataManagement::EventSchema Schema;
+};
+
+struct TestEEmptyEvent_array {
+    uint32_t num;
+    TestEEmptyEvent *buf;
+};
+
+
 //
 // Enums
 //
