@@ -46,7 +46,6 @@ const TraitSchemaEngine::PropertyInfo PropertyMap[] = {
     { kPropertyHandle_TcC, 1 }, // sc_a
     { kPropertyHandle_TcC, 2 }, // sc_b
     { kPropertyHandle_Root, 4 }, // tc_d
-    { kPropertyHandle_Root, 5 }, // tc_e
 };
 
 //
