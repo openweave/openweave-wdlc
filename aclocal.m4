@@ -824,7 +824,6 @@ AC_SUBST([am__tar])
 AC_SUBST([am__untar])
 ]) # _AM_PROG_TAR
 
-m4_include([third_party/nlbuild-autotools/repo/autoconf/m4/nl_enable_tests.m4])
 m4_include([third_party/nlbuild-autotools/repo/autoconf/m4/nl_filtered_canonical.m4])
 m4_include([build/autoconf/m4/nl_check_python_module.m4])
 m4_include([build/autoconf/m4/nl_path_prog.m4])

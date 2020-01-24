@@ -116,8 +116,7 @@ host_triplet = @host@
 target_triplet = @target@
 subdir = third_party/googleapis
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/third_party/nlbuild-autotools/repo/autoconf/m4/nl_enable_tests.m4 \
-	$(top_srcdir)/third_party/nlbuild-autotools/repo/autoconf/m4/nl_filtered_canonical.m4 \
+am__aclocal_m4_deps = $(top_srcdir)/third_party/nlbuild-autotools/repo/autoconf/m4/nl_filtered_canonical.m4 \
 	$(top_srcdir)/build/autoconf/m4/nl_check_python_module.m4 \
 	$(top_srcdir)/build/autoconf/m4/nl_path_prog.m4 \
 	$(top_srcdir)/configure.ac
@@ -173,6 +172,7 @@ INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
 LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
 LN_S = @LN_S@
+LOCAL_SITE_PACKAGES_DIR = @LOCAL_SITE_PACKAGES_DIR@
 LTLIBOBJS = @LTLIBOBJS@
 MAINT = @MAINT@
 MAKEINFO = @MAKEINFO@
