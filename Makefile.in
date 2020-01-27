@@ -261,7 +261,6 @@ INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
 LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
 LN_S = @LN_S@
-LOCAL_SITE_PACKAGES_DIR = @LOCAL_SITE_PACKAGES_DIR@
 LTLIBOBJS = @LTLIBOBJS@
 MAINT = @MAINT@
 MAKEINFO = @MAKEINFO@
@@ -284,6 +283,7 @@ SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
 VERSION = @VERSION@
+WDLC_PYTHON_LOCAL_PACKAGE_DIR = @WDLC_PYTHON_LOCAL_PACKAGE_DIR@
 abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@
 abs_top_builddir = @abs_top_builddir@
@@ -1086,7 +1086,7 @@ $(BACKEND_TARGET): $(top_srcdir)/$(SCRIPTSDIR)/setup_compiler.sh | $(RESULTSDIR)
 	    --libdir "$(WDLC_LIBDIR)" \
 	    --srcdir "$(top_srcdir)" \
 	    --output "$(RESULTSDIR)" \
-	    --local-packages "$(LOCAL_SITE_PACKAGES_DIR)"
+	    --local-packages "$(WDLC_PYTHON_LOCAL_PACKAGE_DIR)"
 
 # A final step of the compiler set-up process is running the compiler
 # backend schema validation. Running that validation requires the

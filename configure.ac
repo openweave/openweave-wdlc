@@ -152,7 +152,7 @@ nl_python_major_minor_version_max="2.7"
 # python executable to use.
 
 AC_ARG_VAR(PYTHON, [Python executable])
-AC_ARG_VAR(LOCAL_SITE_PACKAGES_DIR, [Pip local packages dir])
+AC_ARG_VAR(WDLC_PYTHON_LOCAL_PACKAGE_DIR, [Pip local packages dir])
 
 # Check whether 'python' exists in the current PATH, and if it does,
 # set PYTHON to the fully-qualified, absolute path for it. If the user
