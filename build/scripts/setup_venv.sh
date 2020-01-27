@@ -157,8 +157,6 @@ venv_path="${OUTPUTDIR}/venv"
 
 create_directory "${venv_path}"
 
-echo "JJ1: ${local_packages_dir}"
-
 "${SCRIPTDIR}/install_python_modules.sh" --python "${PYTHON}" --output "${venv_path}" ${requirement_options} --python "${PYTHON}" --local-packages "${local_packages_dir}"
 
 if [ ${?} -ne 0 ]; then

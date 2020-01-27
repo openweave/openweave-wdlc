@@ -162,13 +162,14 @@ source "${OUTPUTDIR}/bin/activate"
 # environment. However, for the sake of being explicit, reference the
 # virtual environment path.
 
-progress "PYTHON" "pip install ${requirement_paths}"
+pip_options="--upgrade ${requirement_options}"
 
 if [ ! -z "${local_packages_dir}" ]; then
-    ${OUTPUTDIR}/bin/python -m pip -q install --upgrade ${requirement_options} --no-index --find-links=${local_packages_dir}
-else
-    ${OUTPUTDIR}/bin/python -m pip -q install --upgrade ${requirement_options}
+    pip_options+=" --no-index --find-links=${local_packages_dir}"
 fi
+
+progress "PYTHON" "pip install ${requirement_paths}"
+${OUTPUTDIR}/bin/python -m pip -q install ${pip_options}
 
 if [ ${?} -ne 0 ]; then
     echo "Could not install Python modules specified in ${requirement_paths}" >&2
