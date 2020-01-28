@@ -1,5 +1,5 @@
 #
-#    Copyright 2019 Google LLC. All Rights Reserved.
+#    Copyright 2019-2020 Google LLC. All Rights Reserved.
 #    Copyright 2015-2016 Nest Labs Inc. All Rights Reserved.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License");
