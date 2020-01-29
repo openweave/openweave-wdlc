@@ -33,7 +33,8 @@ installdeps()
     case "${1}" in
 
         protoc-deps)
-            sudo contrib/download_protoc.sh
+            # Download protoc, and over-ride the local installation if the version doesn't match.
+            sudo contrib/download_protoc.sh --force
 
             ;;
 
