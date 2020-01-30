@@ -44,12 +44,13 @@ function usage() {
         echo ""
         echo "Options:"
         echo ""
-        echo "  -h, --help              Print this help, then exit."
-        echo "  -o, --output DIR        Generate set up to the output directory DIR."
-        echo "  --python PYTHON         Use the PYTHON python executable (default: ${PYTHON})."
-        echo "  -q, --quiet             Work silently; do not display diagnostic and"
-        echo "  -r, --requirement FILE  Install from the given requirements file. This option can be used multiple times."
-        echo "  -v, --verbose           Work verbosely; increase the level of diagnostic"
+        echo "  -h, --help                  Print this help, then exit."
+        echo "  -o, --output DIR            Generate set up to the output directory DIR."
+        echo "  --python PYTHON             Use the PYTHON python executable (default: ${PYTHON})."
+        echo "  -q, --quiet                 Work silently; do not display diagnostic and"
+        echo "  -r, --requirement FILE      Install from the given requirements file. This option can be used multiple times."
+        echo "  -l, --local-packages DIR    Install Python packages from DIR instead of downloading them from the internet."
+        echo "  -v, --verbose               Work verbosely; increase the level of diagnostic"
     fi
 
     exit ${1}
@@ -81,6 +82,7 @@ PYTHON="python"
 requirement_options=""
 requirement_paths=""
 verbose=1
+local_packages_dir=""
 
 # While there are command line options and arguments to parse, parse
 # and consume them.
@@ -118,6 +120,11 @@ while [ "${#}" -gt 0 ]; do
             shift 2
             ;;
 
+        -l | --local-packages)
+            local_packages_dir="${2}"
+            shift 2
+            ;; 
+
         -v | --verbose)
             ((verbose += 1))
             shift 1
@@ -150,7 +157,7 @@ venv_path="${OUTPUTDIR}/venv"
 
 create_directory "${venv_path}"
 
-"${SCRIPTDIR}/install_python_modules.sh" --python "${PYTHON}" --output "${venv_path}" ${requirement_options} --python "${PYTHON}"
+"${SCRIPTDIR}/install_python_modules.sh" --python "${PYTHON}" --output "${venv_path}" ${requirement_options} --python "${PYTHON}" --local-packages "${local_packages_dir}"
 
 if [ ${?} -ne 0 ]; then
     echo "Could not install Python modules specified in ${requirements_paths} to ${OUTPUTDIR}" >&2

@@ -111,8 +111,7 @@ host_triplet = @host@
 target_triplet = @target@
 subdir = codegen/weave-device-cpp
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/third_party/nlbuild-autotools/repo/autoconf/m4/nl_enable_tests.m4 \
-	$(top_srcdir)/third_party/nlbuild-autotools/repo/autoconf/m4/nl_filtered_canonical.m4 \
+am__aclocal_m4_deps = $(top_srcdir)/third_party/nlbuild-autotools/repo/autoconf/m4/nl_filtered_canonical.m4 \
 	$(top_srcdir)/build/autoconf/m4/nl_check_python_module.m4 \
 	$(top_srcdir)/build/autoconf/m4/nl_path_prog.m4 \
 	$(top_srcdir)/configure.ac
@@ -190,6 +189,7 @@ SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
 VERSION = @VERSION@
+WDLC_PYTHON_LOCAL_PACKAGE_DIR = @WDLC_PYTHON_LOCAL_PACKAGE_DIR@
 abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@
 abs_top_builddir = @abs_top_builddir@

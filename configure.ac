@@ -1,4 +1,4 @@
-#                                               -*- Autoconf -*-
+
 # Process this file with autoconf to produce a configure script.
 
 #
@@ -152,6 +152,7 @@ nl_python_major_minor_version_max="2.7"
 # python executable to use.
 
 AC_ARG_VAR(PYTHON, [Python executable])
+AC_ARG_VAR(WDLC_PYTHON_LOCAL_PACKAGE_DIR, [Pip local packages dir])
 
 # Check whether 'python' exists in the current PATH, and if it does,
 # set PYTHON to the fully-qualified, absolute path for it. If the user
@@ -420,7 +421,7 @@ AC_MSG_CHECKING([whether to build tests])
 
 # Tests
 
-NL_ENABLE_TESTS([yes])
+
 
 AM_CONDITIONAL([WDLC_BUILD_TESTS], [test "${nl_cv_build_tests}" = "yes"])
 

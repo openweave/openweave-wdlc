@@ -312,7 +312,8 @@ $(BACKEND_TARGET): $(top_srcdir)/$(SCRIPTSDIR)/setup_compiler.sh | $(RESULTSDIR)
 	    --includedir "$(WDLC_INCLUDEDIR)" \
 	    --libdir "$(WDLC_LIBDIR)" \
 	    --srcdir "$(top_srcdir)" \
-	    --output "$(RESULTSDIR)"
+	    --output "$(RESULTSDIR)" \
+	    --local-packages "$(WDLC_PYTHON_LOCAL_PACKAGE_DIR)"
 
 # A final step of the compiler set-up process is running the compiler
 # backend schema validation. Running that validation requires the
