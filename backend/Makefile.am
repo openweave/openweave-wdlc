@@ -66,7 +66,6 @@ EXTRA_DIST                                                         = \
     lib/nwv/validators/number_validator.py                           \
     lib/nwv/validators/one_byte_field_tag_validator.py               \
     lib/nwv/validators/one_interface_type_validator.py               \
-    lib/nwv/validators/read_write_validator.py                       \
     lib/nwv/validators/removed_object_validator.py                   \
     lib/nwv/validators/stability_reference_validator.py              \
     lib/nwv/validators/stability_validator.py                        \
