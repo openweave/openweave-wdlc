@@ -44,11 +44,4 @@ class TraitInstanceIdValidator(validator.VisitorValidator):
                           component.instance_id))
       instances.add(component.instance_id)
 
-    for trait_type, instances in trait_types.iteritems():
-      if 0 not in instances:
-        self.add_failure("Trait type %s does not have a "
-                         "component with instance id 0." %
-                         (trait_type.full_name))
-
-
 process = TraitInstanceIdValidator.process
