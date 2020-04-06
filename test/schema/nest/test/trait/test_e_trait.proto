@@ -159,4 +159,45 @@ message TestETrait {
             reserved_tag_max: 31
         };
     }
+
+    message StructELarge {
+        option (wdl.message_type) = STRUCT;
+        option (wdl.structopts) = {
+            extendable: true,
+            reserved_tag_min: 1,
+            reserved_tag_max: 31
+        };
+
+        uint32 sel_a = 1;
+        uint32 sel_b = 2;
+        uint32 sel_c = 3;
+        uint32 sel_d = 4;
+        uint32 sel_f = 5;
+        bool sel_g = 6;
+    }
+
+    message TestELargeArrayNullableEvent {
+        option (wdl.message_type) = EVENT;
+        option (wdl.event) = {
+            id: 4,
+            event_importance: EVENT_IMPORTANCE_PRODUCTION_STANDARD,
+            extendable: true,
+            reserved_tag_min: 1,
+            reserved_tag_max: 31
+        };
+        google.protobuf.UInt32Value telane_a = 1 [(wdl.param) = {nullable: true}];
+        repeated StructELarge telane_b = 2;
+    }
+    message TestESmallArrayNullableEvent {
+        option (wdl.message_type) = EVENT;
+        option (wdl.event) = {
+            id: 5,
+            event_importance: EVENT_IMPORTANCE_PRODUCTION_STANDARD,
+            extendable: true,
+            reserved_tag_min: 1,
+            reserved_tag_max: 31
+        };
+        google.protobuf.UInt32Value tesane_a = 1 [(wdl.param) = {nullable: true}];
+        repeated bool tesane_b = 2;
+    }
 }
