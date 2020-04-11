@@ -268,7 +268,7 @@ if test "${PROTOC}" != ""; then
     AC_CACHE_CHECK([${PROTOC} version],
 		   nl_cv_protoc_version,
 		   [
-		       nl_cv_protoc_version=`${PROTOC} --version 2>&1 | ${SED} -n -e 's/^.\{1,\}\([[0-9]]\{1,\}.[[0-9]]\{1,\}.[[0-9]]\{1,\}\)$/\1/gp'`
+		       nl_cv_protoc_version=`${PROTOC} --version 2>&1 | ${SED} -n -E -e 's/^[[^0-9]]*(([[0-9]]+\.)*[[0-9]]+).*/\1/p'`
 
 		       if test "${nl_cv_protoc_version}" = "" ; then
 			   nl_cv_protoc_version="unknown"
