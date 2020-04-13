@@ -48,6 +48,7 @@ function usage() {
         echo "  --python PYTHON          Use the PYTHON python executable (default: ${PYTHON})."
         echo "  -q, --quiet              Work silently; do not display diagnostic and"
         echo "  -r, --requirement FILE   Install from the given requirements file. This option can be used multiple times."
+        echo "  -l, --local-packages DIR Install Python packages from DIR instead of downloading them from the internet."
         echo "  -v, --verbose            Work verbosely; increase the level of diagnostic"
     fi
 
@@ -69,6 +70,7 @@ PYTHON="python"
 requirement_options=""
 requirement_paths=""
 verbose=1
+local_packages_dir=""
 
 # While there are command line options and arguments to parse, parse
 # and consume them.
@@ -103,6 +105,11 @@ while [ "${#}" -gt 0 ]; do
 
             requirement_paths="${requirement_paths}${requirement_paths:+ }${2}"
             requirement_options="${requirement_options}${requirement_options:+ }${1} ${2}"
+            shift 2
+            ;;
+
+        -l | --local-packages)
+            local_packages_dir="${2}"
             shift 2
             ;;
 
@@ -155,8 +162,14 @@ source "${OUTPUTDIR}/bin/activate"
 # environment. However, for the sake of being explicit, reference the
 # virtual environment path.
 
+pip_options="--upgrade ${requirement_options}"
+
+if [ ! -z "${local_packages_dir}" ]; then
+    pip_options+=" --no-index --find-links=${local_packages_dir}"
+fi
+
 progress "PYTHON" "pip install ${requirement_paths}"
-${OUTPUTDIR}/bin/python -m pip -q install --upgrade ${requirement_options}
+${OUTPUTDIR}/bin/python -m pip -q install ${pip_options}
 
 if [ ${?} -ne 0 ]; then
     echo "Could not install Python modules specified in ${requirement_paths}" >&2

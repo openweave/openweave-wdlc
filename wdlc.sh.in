@@ -1,7 +1,7 @@
 #!/bin/bash -e
 
 #
-#    Copyright (c) 2019 Google LLC. All Rights Reserved.
+#    Copyright (c) 2019-2020 Google LLC. All Rights Reserved.
 #    Copyright (c) 2016-2018 Nest Labs Inc. All Rights Reserved.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License");
@@ -88,6 +88,12 @@ function usage() {
         echo "                                       schema that can be used in place of "
         echo "                                       schema in a future invocation, or used "
         echo "                                       for version validation using the"
+        echo "  -MF FILE                             Emit dependency file information that is compatible"
+        echo "                                       with make for the given input to FILE (requires -MT option)"
+        echo "  -MT TARGET                           When using the -MF option, specifies the target to emitted"
+        echo "                                       in the dependency file"
+        echo "  -MP                                  Adds a phony target for each dependency other than that specified"
+        echo "                                       by -MT."
         echo "                                       --previous-intermediate-in option."
         echo "  -o, --output DIR                     Generate code to the output directory"
         echo "  -q, --quiet                          Work silently; do not display diagnostic"
@@ -111,7 +117,7 @@ function usage() {
 #
 function version() {
     echo "wdlc @WDLC_VERSION@"
-    echo "Copyright (c) 2019 Google LLC."
+    echo "Copyright (c) 2019-2020 Google LLC."
     echo "Copyright (c) 2016-2018 Nest Labs, Inc."
 }
 
@@ -233,11 +239,19 @@ function gwvc_compare_schema_versions() {
 #
 function protoc_generate_proto_descriptor_set() {
     local descriptor_set_path="${1}"
+    local dependency_file_path="${2}"
+    local dependency_option=""
+
+    if [ -n "${2}" ] ; then
+        dependency_option="--dependency_out ${2}"
+    fi
+
     local command="${PROTOC} \
         --include_source_info \
         --include_imports \
         ${protoc_search_path_options} \
         --descriptor_set_out=${descriptor_set_path} \
+        ${dependency_option} \
         ${input_paths}"
 
     # Generate, if not dry-running, the protobuf file set descriptor
@@ -257,6 +271,47 @@ function remove_proto_descriptor_set() {
     local command="rm -f ${descriptor_set_path}"
 
     maybe_run_or_dry_run ${command}
+}
+
+#
+# generate_temp_proto_descriptor_set output_directory
+#
+# Generates a dummy descriptor binary file with a randomized name
+#
+function generate_temp_proto_descriptor_set() {
+    local output_dir="${1}"
+    local command="mktemp ${output_dir}/proto-descriptor-set-XXXXXX.proto.bin"
+
+    maybe_run_or_dry_run ${command}
+}
+
+#
+# fixup_dependency_file <file-name> <target> <emit-phony-target>
+#
+# Fixes up the dependency file emitted by protoc to be compliant with
+# make
+#
+function fixup_dependency_file() {
+    local file_path="${1}"
+    local target="${2}"
+    local emit_phony="${3}"
+
+    # Setup a scratch file with the target
+    echo -e "${target}: \\" > "${file_path}".tmp
+
+    # Append the dependency set to the tmp file
+    cat "${file_path}" >> "${file_path}".tmp
+
+    if [ ${emit_phony} = true ]; then
+        echo -e "\n" >> "${file_path}".tmp
+
+        # Emit the entire dependency set again, and terminate it with a colon
+        cat "${file_path}" >> "${file_path}".tmp
+        echo -e ':' >> "${file_path}".tmp
+    fi
+
+    # Move the tmp file back to the requested output file
+    mv "${file_path}".tmp "${file_path}"
 }
 
 #
@@ -362,6 +417,9 @@ should_dry_run=0
 template_dir=""
 template_arg=""
 verbose=0
+dependency_file_path=""
+dependency_file_target=""
+emit_phony_target=false
 
 while [ "${#}" -gt 0 ]; do
 
@@ -423,6 +481,21 @@ while [ "${#}" -gt 0 ]; do
         --output-intermediate)
             intermediate_output_path=${2}
             shift 2
+            ;;
+
+        -MF)
+            dependency_file_path=${2}
+            shift 2
+            ;;
+
+        -MT)
+            dependency_file_target=${2}
+            shift 2
+            ;;
+
+        -MP)
+            emit_phony_target=true
+            shift 1
             ;;
 
         -q | --quiet)
@@ -499,8 +572,6 @@ else
     echo "note: running protoc, '${PROTOC}', specified from the environment via PROTOC rather than 'protoc'."
 fi
 
-proto_descriptor_set_name="proto-descriptor-set.proto.bin"
-
 current_proto_descriptor_set_path=""
 previous_proto_descriptor_set_path=""
 
@@ -524,8 +595,6 @@ if [ "${input_format}" == "intermediate" ]; then
 elif [ "${input_format}" == "source" ]; then
     if [ -n "${intermediate_output_path}" ]; then
         current_proto_descriptor_set_path="${intermediate_output_path}"
-    else
-        current_proto_descriptor_set_path="${output_dir}/${proto_descriptor_set_name}"
     fi
 else
     echo "Invalid input format option"
@@ -536,8 +605,6 @@ if [ -d "${intermediate_output_path}" ]; then
     echo "Please pass in a valid path to a intermediate output file"
     usage 1 "${wdlc_datadir}"
 fi
-
-protoc_search_path_options="--proto_path ${wdlc_includedir}"
 
 # The template argument for code generation is either a short-cut to a
 # wdlc-internal directory or an absolute or relative path to an
@@ -576,6 +643,10 @@ if [ ${#protoc_search_paths[@]} -gt 0 ]; then
         protoc_search_path_options+=" --proto_path ${protoc_search_path}"
     done
 fi
+
+# We append the compiler-specific include path after to allow for the user to specify paths
+# that can over-ride the content provided by the installed compiler (e.g test traits)
+protoc_search_path_options+=" --proto_path ${wdlc_includedir}"
 
 # If the input points to a directory, convert it to specify the set of proto files in them instead.
 if [ -d "${input_paths}" ]; then
@@ -616,6 +687,18 @@ if [ ${should_dry_run} -eq 0 ]; then
     check_required_executable GWVC gwvc
 fi
 
+if [ -n "${dependency_file_path}" ] && [ ! -n "${dependency_file_target}" ]; then
+    echo "A target must be specified through the -MT option!"
+    usage 1
+fi
+
+# If a path hasn't been specified yet so far for the intermediate binary, we pick one by default.
+# A randomly generated file name will be vended for intermediate descriptor - this ensures that wdlc can be
+# invoked in parallel without having colliding descriptor binaries.
+if [ -z "${current_proto_descriptor_set_path}" ]; then
+    current_proto_descriptor_set_path=$(generate_temp_proto_descriptor_set "${output_dir}")
+fi
+
 # Whether we are checking / validating the schema corpus or running
 # code generation, the coherency and correctness of the schema corpus
 # must be verified first.
@@ -627,7 +710,12 @@ if [ ${mode} = "check"  ] || [ ${mode} = "codegen" ]; then
     # in the specified protobuf file set descriptor binary.
 
     if [ "${input_format}" == "source" ]; then
-        protoc_generate_proto_descriptor_set "${current_proto_descriptor_set_path}"
+        protoc_generate_proto_descriptor_set "${current_proto_descriptor_set_path}" "${dependency_file_path}"
+    fi
+
+    # Fix-up the dependency file to be compliant with what make expects
+    if [ -n "${dependency_file_path}" ]; then
+        fixup_dependency_file "${dependency_file_path}" "${dependency_file_target}" "${emit_phony_target}"
     fi
 
     # Drive, if not dry-running, the gwvc back-end to generate

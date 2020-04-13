@@ -1,5 +1,5 @@
 #
-#    Copyright (c) 2019 Google LLC. All Rights Reserved.
+#    Copyright (c) 2019-2020 Google LLC. All Rights Reserved.
 #    Copyright (c) 2016-2018 Nest Labs Inc. All Rights Reserved.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License");
@@ -43,12 +43,5 @@ class TraitInstanceIdValidator(validator.VisitorValidator):
                          (component.full_name, component.trait.full_name,
                           component.instance_id))
       instances.add(component.instance_id)
-
-    for trait_type, instances in trait_types.iteritems():
-      if 0 not in instances:
-        self.add_failure("Trait type %s does not have a "
-                         "component with instance id 0." %
-                         (trait_type.full_name))
-
 
 process = TraitInstanceIdValidator.process

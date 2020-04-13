@@ -1,6 +1,6 @@
 
 /*
- *    Copyright (c) 2019 Google LLC.
+ *    Copyright (c) 2019-2020 Google LLC.
  *    Copyright (c) 2016-2018 Nest Labs, Inc.
  *    All rights reserved.
  *
@@ -237,6 +237,22 @@ const nl::Weave::Profiles::DataManagement::EventSchema TestENullableEvent::Schem
 {
     .mProfileId = kWeaveProfileId,
     .mStructureType = 0x2,
+    .mImportance = nl::Weave::Profiles::DataManagement::Production,
+    .mDataSchemaVersion = 2,
+    .mMinCompatibleDataSchemaVersion = 1,
+};
+
+const nl::SchemaFieldDescriptor TestEEmptyEvent::FieldSchema =
+{
+    .mNumFieldDescriptorElements = 0,
+    .mFields = NULL,
+    .mSize =  sizeof(TestEEmptyEvent)
+};
+
+const nl::Weave::Profiles::DataManagement::EventSchema TestEEmptyEvent::Schema =
+{
+    .mProfileId = kWeaveProfileId,
+    .mStructureType = 0x3,
     .mImportance = nl::Weave::Profiles::DataManagement::Production,
     .mDataSchemaVersion = 2,
     .mMinCompatibleDataSchemaVersion = 1,

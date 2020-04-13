@@ -1,5 +1,5 @@
 {#
- #    Copyright (c) 2019 Google LLC. All Rights Reserved.
+ #    Copyright (c) 2019-2020 Google LLC. All Rights Reserved.
  #    Copyright (c) 2016-2018 Nest Labs Inc. All Rights Reserved.
  #
  #    Licensed under the Apache License, Version 2.0 (the "License");
@@ -64,4 +64,12 @@ const nl::SchemaFieldDescriptor {{struct.base_name}}::FieldSchema =
     .mFields = {{struct.base_name}}FieldDescriptors,
     .mSize = sizeof({{struct.base_name}})
 };
+{% else %}
+const nl::SchemaFieldDescriptor {{struct.base_name}}::FieldSchema =
+{
+    .mNumFieldDescriptorElements = 0,
+    .mFields = NULL,
+    .mSize =  sizeof({{struct.base_name}})
+};
+
 {% endif %}

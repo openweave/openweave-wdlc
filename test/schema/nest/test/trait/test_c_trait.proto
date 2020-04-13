@@ -25,13 +25,6 @@ message TestCTrait {
         id: 0xFE03,
         version: 2,
         stability: ALPHA,
-        version_map: [
-          {
-             parent_version: 2, dependent_version_list: [
-               {name: "nest.test.trait.TestCommonVersioned", version: 2}
-             ]
-          }
-        ]
     };
 
     message StructC {
@@ -74,5 +67,4 @@ message TestCTrait {
     EnumC tc_b = 2;
     StructC tc_c = 3;
     uint32 tc_d = 4 [(wdl.prop) = {compatibility: {min_version: 2}}];
-    TestCommonVersioned.CommonEnumE tc_e = 5;
 }

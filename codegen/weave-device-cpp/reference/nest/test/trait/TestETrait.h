@@ -1,6 +1,6 @@
 
 /*
- *    Copyright (c) 2019 Google LLC.
+ *    Copyright (c) 2019-2020 Google LLC.
  *    Copyright (c) 2016-2018 Nest Labs, Inc.
  *    All rights reserved.
  *
@@ -510,6 +510,26 @@ inline bool TestENullableEvent::IsNeJPresent(void)
     return (!GET_FIELD_NULLIFIED_BIT(__nullified_fields__, 9));
 }
 #endif
+
+struct TestEEmptyEvent
+{
+
+    static const nl::SchemaFieldDescriptor FieldSchema;
+
+    // Statically-known Event Struct Attributes:
+    enum {
+            kWeaveProfileId = (0x235aU << 16) | 0xfe06U,
+        kEventTypeId = 0x3U
+    };
+
+    static const nl::Weave::Profiles::DataManagement::EventSchema Schema;
+};
+
+struct TestEEmptyEvent_array {
+    uint32_t num;
+    TestEEmptyEvent *buf;
+};
+
 
 //
 // Enums

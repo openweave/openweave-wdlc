@@ -1,6 +1,6 @@
 
 /*
- *    Copyright (c) 2019 Google LLC.
+ *    Copyright (c) 2019-2020 Google LLC.
  *    Copyright (c) 2016-2018 Nest Labs, Inc.
  *    All rights reserved.
  *
@@ -46,7 +46,6 @@ const TraitSchemaEngine::PropertyInfo PropertyMap[] = {
     { kPropertyHandle_TcC, 1 }, // sc_a
     { kPropertyHandle_TcC, 2 }, // sc_b
     { kPropertyHandle_Root, 4 }, // tc_d
-    { kPropertyHandle_Root, 5 }, // tc_e
     { kPropertyHandle_Root, 32 }, // td_d
     { kPropertyHandle_Root, 33 }, // td_e
     { kPropertyHandle_Root, 34 }, // td_f
@@ -68,7 +67,7 @@ const TraitSchemaEngine TraitSchema = {
         sizeof(PropertyMap) / sizeof(PropertyMap[0]),
         2,
 #if (TDM_EXTENSION_SUPPORT) || (TDM_VERSIONING_SUPPORT)
-        9,
+        8,
 #endif
         NULL,
         NULL,

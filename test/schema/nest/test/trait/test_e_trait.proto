@@ -148,4 +148,15 @@ message TestETrait {
         google.protobuf.StringValue ne_i = 9 [(wdl.param) = {nullable: true}];
         NullableE ne_j = 10 [(wdl.param) = {nullable: true}];
     }
+
+    message TestEEmptyEvent {
+        option (wdl.message_type) = EVENT;
+        option (wdl.event) = {
+            id: 3,
+            event_importance: EVENT_IMPORTANCE_PRODUCTION_STANDARD,
+            extendable: true,
+            reserved_tag_min: 1,
+            reserved_tag_max: 31
+        };
+    }
 }

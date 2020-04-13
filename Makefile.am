@@ -1,5 +1,5 @@
 #
-#    Copyright (c) 2019 Google LLC. All Rights Reserved.
+#    Copyright (c) 2019-2020 Google LLC. All Rights Reserved.
 #    Copyright (c) 2016-2018 Nest Labs Inc. All Rights Reserved.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License");
@@ -312,7 +312,8 @@ $(BACKEND_TARGET): $(top_srcdir)/$(SCRIPTSDIR)/setup_compiler.sh | $(RESULTSDIR)
 	    --includedir "$(WDLC_INCLUDEDIR)" \
 	    --libdir "$(WDLC_LIBDIR)" \
 	    --srcdir "$(top_srcdir)" \
-	    --output "$(RESULTSDIR)"
+	    --output "$(RESULTSDIR)" \
+	    --local-packages "$(WDLC_PYTHON_LOCAL_PACKAGE_DIR)"
 
 # A final step of the compiler set-up process is running the compiler
 # backend schema validation. Running that validation requires the

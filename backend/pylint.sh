@@ -1,7 +1,7 @@
 #!/bin/bash -e
 
 #
-#    Copyright (c) 2019 Google LLC.
+#    Copyright (c) 2019-2020 Google LLC.
 #    Copyright (c) 2016-2018 Nest Labs, Inc.
 #    All rights reserved.
 #

@@ -42,18 +42,19 @@ function usage() {
         echo ""
         echo "Options:"
         echo ""
-        echo "  --bindir DIR            Set the executable directory to DIR, relative to the output directory."
-        echo "  --datadir DIR           Set the read-only data directory to DIR, relative to the output directory."
-        echo "  -h, --help              Print this help, then exit."
-        echo "  --includedir DIR        Set the header directory to DIR, relative to the output directory."
-        echo "  --libdir DIR            Set the library directory to DIR, relative to the output directory."
-        echo "  --srcdir DIR            Find the package sources in DIR (default: ${PWD})."
-        echo "  -o, --output DIR        Generate set up to the output directory DIR."
-        echo "  --protoc PROTOC         Use the PROTOC protoc executable (default: ${PROTOC})."
-        echo "  --python PYTHON         Use the PYTHON python executable (default: ${PYTHON})."
-        echo "  -q, --quiet             Work silently; do not display diagnostic and"
-        echo "  -r, --requirement FILE  Install from the given Python PIP requirements file. This option can be used multiple times."
-        echo "  -v, --verbose           Work verbosely; increase the level of diagnostic"
+        echo "  --bindir DIR                Set the executable directory to DIR, relative to the output directory."
+        echo "  --datadir DIR               Set the read-only data directory to DIR, relative to the output directory."
+        echo "  -h, --help                  Print this help, then exit."
+        echo "  --includedir DIR            Set the header directory to DIR, relative to the output directory."
+        echo "  --libdir DIR                Set the library directory to DIR, relative to the output directory."
+        echo "  --srcdir DIR                Find the package sources in DIR (default: ${PWD})."
+        echo "  -o, --output DIR            Generate set up to the output directory DIR."
+        echo "  --protoc PROTOC             Use the PROTOC protoc executable (default: ${PROTOC})."
+        echo "  --python PYTHON             Use the PYTHON python executable (default: ${PYTHON})."
+        echo "  -q, --quiet                 Work silently; do not display diagnostic and"
+        echo "  -r, --requirement FILE      Install from the given Python PIP requirements file. This option can be used multiple times."
+        echo "  -l, --local-packages DIR    Install Python packages from DIR instead of downloading them from the internet."
+        echo "  -v, --verbose               Work verbosely; increase the level of diagnostic"
     fi
 
     exit ${1}
@@ -101,6 +102,7 @@ wdlc_datadir=""
 wdlc_libdir=""
 wdlc_includedir=""
 wdlc_srcdir="${PWD}"
+local_packages_dir=""
 
 # While there are command line options and arguments to parse, parse
 # and consume them.
@@ -152,6 +154,11 @@ while [ "${#}" -gt 0 ]; do
             verbose=0
             shift 1
             ;;
+
+        -l | --local-packages)
+            local_packages_dir="${2}"
+            shift 2
+            ;; 
 
         -r | --requirement)
             # Accumulate Python PIP requirement paths by appending
@@ -271,7 +278,7 @@ find "${wdlc_libdir}/" -type d -exec chmod 775 {} \;
 create_directory "${wdlc_datadir}"
 
 progress "SETUP" "python"
-"${SCRIPTDIR}/setup_venv.sh" --output "${wdlc_datadir}" --python "${PYTHON}" ${requirement_options}
+"${SCRIPTDIR}/setup_venv.sh" --output "${wdlc_datadir}" --python "${PYTHON}" ${requirement_options} --local-packages "${local_packages_dir}"
 
 if [ ${?} -ne 0 ]; then
     echo "Could not set up Python for the wdlc backend." >&2

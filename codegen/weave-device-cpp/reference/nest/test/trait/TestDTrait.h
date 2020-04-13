@@ -1,6 +1,6 @@
 
 /*
- *    Copyright (c) 2019 Google LLC.
+ *    Copyright (c) 2019-2020 Google LLC.
  *    Copyright (c) 2016-2018 Nest Labs, Inc.
  *    All rights reserved.
  *
@@ -31,7 +31,6 @@
 #include <Weave/Support/SerializationUtils.h>
 
 #include <nest/test/trait/TestCTrait.h>
-#include <nest/test/trait/TestCommonVersioned.h>
 
 
 namespace Schema {
@@ -88,29 +87,24 @@ enum {
     kPropertyHandle_TcD = 7,
 
     //
-    //  tc_e                                nest.test.trait.TestCommonVersioned.CommonEnumE int               NO              NO
-    //
-    kPropertyHandle_TcE = 8,
-
-    //
     //  td_d                                string                               string            NO              NO
     //
-    kPropertyHandle_TdD = 9,
+    kPropertyHandle_TdD = 8,
 
     //
     //  td_e                                int32                                int32             NO              NO
     //
-    kPropertyHandle_TdE = 10,
+    kPropertyHandle_TdE = 9,
 
     //
     //  td_f                                bool                                 bool              NO              NO
     //
-    kPropertyHandle_TdF = 11,
+    kPropertyHandle_TdF = 10,
 
     //
     // Enum for last handle
     //
-    kLastSchemaHandle = 11,
+    kLastSchemaHandle = 10,
 };
 
 } // namespace TestDTrait

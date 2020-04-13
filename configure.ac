@@ -1,8 +1,8 @@
-#                                               -*- Autoconf -*-
+
 # Process this file with autoconf to produce a configure script.
 
 #
-#    Copyright (c) 2019 Google LLC. All Rights Reserved.
+#    Copyright (c) 2019-2020 Google LLC. All Rights Reserved.
 #    Copyright (c) 2016-2018 Nest Labs Inc. All Rights Reserved.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License");
@@ -152,6 +152,7 @@ nl_python_major_minor_version_max="2.7"
 # python executable to use.
 
 AC_ARG_VAR(PYTHON, [Python executable])
+AC_ARG_VAR(WDLC_PYTHON_LOCAL_PACKAGE_DIR, [Pip local packages dir])
 
 # Check whether 'python' exists in the current PATH, and if it does,
 # set PYTHON to the fully-qualified, absolute path for it. If the user
@@ -267,7 +268,7 @@ if test "${PROTOC}" != ""; then
     AC_CACHE_CHECK([${PROTOC} version],
 		   nl_cv_protoc_version,
 		   [
-		       nl_cv_protoc_version=`${PROTOC} --version 2>&1 | ${SED} -n -e 's/^.\{1,\}\([[0-9]]\{1,\}.[[0-9]]\{1,\}.[[0-9]]\{1,\}\)$/\1/gp'`
+		       nl_cv_protoc_version=`${PROTOC} --version 2>&1 | ${SED} -n -E -e 's/^[[^0-9]]*(([[0-9]]+\.)*[[0-9]]+).*/\1/p'`
 
 		       if test "${nl_cv_protoc_version}" = "" ; then
 			   nl_cv_protoc_version="unknown"
@@ -420,7 +421,7 @@ AC_MSG_CHECKING([whether to build tests])
 
 # Tests
 
-NL_ENABLE_TESTS([yes])
+
 
 AM_CONDITIONAL([WDLC_BUILD_TESTS], [test "${nl_cv_build_tests}" = "yes"])
 
