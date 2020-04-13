@@ -1,3 +1,7 @@
+1.0.3 (2020-04-10)
+
+        * Improve version parsing for protoc during package configuration.
+
 1.0.2 (2019-08-13)
 
         * Address GitHub-flagged Jinja2 issue by increasing the minimum
