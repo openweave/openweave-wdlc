@@ -59,7 +59,6 @@ from nwv.validators import no_new_java_outer_classname_validator
 from nwv.validators import nullable_validator
 from nwv.validators import number_validator
 from nwv.validators import one_interface_type_validator
-from nwv.validators import read_write_validator
 from nwv.validators import removed_object_validator
 from nwv.validators import stability_reference_validator
 from nwv.validators import stability_validator
@@ -138,7 +137,6 @@ def check(schema_object, *_):
       name_inflection_validator,
       name_suffix_validator,
       enum_value_name_validator,
-      read_write_validator,
       nullable_validator,
       extends_validator,
       one_interface_type_validator,
