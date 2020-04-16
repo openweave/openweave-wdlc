@@ -52,7 +52,7 @@ class NumberValidator(validator.VisitorValidator):
         return
 
       fixed_encoding_width = self.fpn(field.min_value, field.max_value,
-                                      field.precision)
+                                      field.precision) or 0
       if field.fixed_width < fixed_encoding_width:
         self.add_failure('Fixed width not large enough for given '
                          'min, max and precision.')

@@ -53,7 +53,7 @@ enum {{ enum.base_name }} {
               chain(get_struct_dependencies(obj)|reject('common')|map(attribute='parent'))|
               chain(get_struct_dependencies(obj)|select('common'))|
               reject('false')|unique|reject('standard')|reject('vendor')|
-              reject('equalto',obj)|sort -%}
+              reject('equalto',obj)|sort(attribute='full_name') -%}
 
 #include <{{ c_header_file(dep) }}>
 {% endfor %}
