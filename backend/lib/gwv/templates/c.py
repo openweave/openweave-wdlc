@@ -33,6 +33,8 @@ import inflection
 
 from gwv import schema
 from gwv.templates import base
+from six.moves import map
+from six.moves import range
 
 
 class CodegenTemplate(base.CodegenTemplate):
@@ -212,7 +214,7 @@ def resource_id_number(resource_id_str):
   """Returns the resource id number."""
 
   _, hex_number = resource_id_str.split('_')
-  return long(hex_number, 16)
+  return int(hex_number, 16)
 
 
 def resource_id_bytes(resource_id_str):

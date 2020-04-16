@@ -470,7 +470,7 @@ class Parser(object):
     typespace.version_map = schema.VersionMap(options.version_map)
 
     for nested_msg_desc in _order_messages_by_dependency(
-        typespace.desc.messages.values(), typespace.full_name):
+        list(typespace.desc.messages.values()), typespace.full_name):
       if nested_msg_desc.is_map_entry:
         continue  # ignore map entries
       nested_msg = self.get_obj(nested_msg_desc.full_name)
@@ -557,7 +557,7 @@ class Parser(object):
       trait.state_list.append(self.get_obj(field_desc.full_name))
 
     for nested_msg_desc in _order_messages_by_dependency(
-        trait.desc.messages.values(), trait.full_name):
+        list(trait.desc.messages.values()), trait.full_name):
       if nested_msg_desc.is_map_entry:
         continue  # ignore map entries
       nested_msg = self.get_obj(nested_msg_desc.full_name)
@@ -1004,7 +1004,7 @@ class Parser(object):
           'TRAIT': options.Extensions[wdl_options_pb2.trait].id,
           'EVENT': options.Extensions[wdl_options_pb2.event].id,
           'COMMAND': options.Extensions[wdl_options_pb2.command].id
-      }.get(typ, _unique_number.next())
+      }.get(typ, next(_unique_number))
     elif isinstance(desc, proto_pool.FieldDesc):
       parent_typ = wdl_options_pb2.MessageType.Name(
           desc.parent.options.Extensions[wdl_options_pb2.message_type])
@@ -1022,10 +1022,10 @@ class Parser(object):
         typ_cls = schema.ConstantGroup
       else:
         typ_cls = schema.Enum
-      obj_id = _unique_number.next()
+      obj_id = next(_unique_number)
     elif isinstance(desc, proto_pool.FileDesc):
       typ_cls = schema.File
-      obj_id = _unique_number.next()
+      obj_id = next(_unique_number)
 
     obj = typ_cls(desc.full_name, obj_id, comments)
     obj.desc = desc

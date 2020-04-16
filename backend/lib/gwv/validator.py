@@ -30,6 +30,7 @@ from __future__ import print_function
 import unittest
 from gwv import schema
 from gwv import visitor
+from six.moves import map
 
 class ValidationWarning(Exception):
   """Exception indicating that schema failed validation."""

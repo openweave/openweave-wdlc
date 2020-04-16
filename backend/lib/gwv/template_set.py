@@ -42,6 +42,7 @@ from gwv.templates import java
 from gwv.templates import js
 from gwv.templates import md
 from gwv.templates import objc
+import six
 
 # Mapping from file extension to a codegen template constructor.
 codegen_template_mapping = collections.OrderedDict([
@@ -147,7 +148,7 @@ class TemplateSet(object):
       class should match for unknown file types, so this should never happen.
     """
 
-    for (pattern, template_class) in codegen_template_mapping.iteritems():
+    for (pattern, template_class) in six.iteritems(codegen_template_mapping):
       if re.match(pattern, template_filename):
         return template_class(template_filename)
 

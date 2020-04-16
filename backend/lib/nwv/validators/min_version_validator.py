@@ -24,6 +24,7 @@
 
 """Ensures min_version never exceeds parent version."""
 
+from __future__ import absolute_import
 from gwv import schema
 from gwv import validator
 
