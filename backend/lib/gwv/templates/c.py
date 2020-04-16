@@ -225,7 +225,11 @@ def resource_id_bytes(resource_id_str):
   packed = struct.pack('>HQ',
                        getattr(schema.Field.ResourceType, type_name).value,
                        number)
-  return map(ord, packed)
+  if isinstance(packed, str):
+    rv = [ord(x) for x in packed]
+  else:
+    rv = [x for x in packed]
+  return rv
 
 
 def list_to_bitfield(table):
