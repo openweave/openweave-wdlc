@@ -100,13 +100,16 @@ def _order_messages_by_dependency(messages, namespace):
   remaining_messages = collections.OrderedDict(
       (x.full_name, (x, _get_dependencies_in_namespace(x, namespace)))
       for x in messages)
-  while remaining_messages:
+  already_processed = set()
+  while len(remaining_messages) != len(already_processed):
     for nested_msg_desc, deps in remaining_messages.values():
+      if nested_msg_desc.full_name in already_processed:
+        continue
       for dep in deps:
-        if dep in remaining_messages:
+        if dep not in already_processed and dep in remaining_messages:
           break
       else:
-        del remaining_messages[nested_msg_desc.full_name]
+        already_processed.add(nested_msg_desc.full_name)
         yield nested_msg_desc
 
 
@@ -711,11 +714,9 @@ class Parser(object):
     for value in enum.desc.values.values():
       description = self.parse_comments(value)
       pair_opts = value.options.Extensions[wdl_options_pb2.enumvalue]
-
       value.full_name.replace(
-          inflection.underscore(enum.base_name).decode('utf-8').upper() + '_',
+          inflection.underscore(enum.base_name).upper() + '_',
           '')
-
       enum_pair = schema.EnumPair(value.full_name, value.number, description)
       enum_pair.source_file = enum.source_file
 
