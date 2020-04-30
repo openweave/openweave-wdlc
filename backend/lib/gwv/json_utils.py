@@ -31,6 +31,7 @@ import collections
 import math
 
 from gwv import schema
+import six
 
 
 class JsonFormat(object):
@@ -115,8 +116,8 @@ def struct_as_json(struct, json_format):
   rv['properties'] = fields_as_json(struct.field_list, json_format)
 
   required_list = []
-  for (name, d) in rv['properties'].iteritems():
-    if d.has_key('isRequired'):
+  for (name, d) in six.iteritems(rv['properties']):
+    if 'isRequired' in d:
       if d['isRequired']:
         required_list.append(name)
       del d['isRequired']

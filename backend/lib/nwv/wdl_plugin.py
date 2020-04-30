@@ -133,17 +133,23 @@ def codegen(request, response):
     out_file.name = filename
     # The newline was added in the legacy template_set file writer,
     # so it's included here to preserve compatibility.
-    out_file.content = content.encode('utf-8') + '\n'
+    out_file.content = content.encode('utf-8') + '\n'.encode('utf-8')
 
 
 if __name__ == '__main__':
   logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.WARN)
 
-  std_in = sys.stdin.read()
+  if sys.version_info.major == 2:
+    std_in = sys.stdin.read()
+  else:
+    std_in = open(0, "rb").read()
 
   request_pb2 = plugin_pb2.CodeGeneratorRequest.FromString(std_in)
   response_pb2 = plugin_pb2.CodeGeneratorResponse()
 
   codegen(request_pb2, response_pb2)
 
-  sys.stdout.write(response_pb2.SerializeToString())
+  if sys.version_info.major == 2:
+    sys.stdout.write(response_pb2.SerializeToString())
+  else:
+    open(1,"wb").write(response_pb2.SerializeToString())

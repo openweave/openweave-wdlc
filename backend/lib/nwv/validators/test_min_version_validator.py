@@ -24,6 +24,7 @@
 
 """Test for MinVersionValidator validator."""
 
+from __future__ import absolute_import
 import unittest
 from gwv import schema
 from gwv import validator

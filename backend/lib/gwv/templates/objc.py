@@ -35,6 +35,7 @@ import inflection
 from gwv import exception
 from gwv import schema
 from gwv.templates import base
+import six
 
 CLASS_PREFIX_NLK = 'NLK'
 CLASS_PREFIX_GPB = 'GPB'
@@ -100,7 +101,7 @@ def flatten(objects):
   flat_objects = []
   for obj in objects:
     if (isinstance(obj, collections.Iterable) and
-        not isinstance(obj, (str, unicode))):
+        not isinstance(obj, (str, six.text_type))):
       flat_objects.extend(flatten(obj))
     elif obj is not None:
       flat_objects.append(obj)

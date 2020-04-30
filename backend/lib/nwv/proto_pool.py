@@ -69,7 +69,7 @@ class ProtoDesc(object):
     return getattr(self._base_, attr)
 
   def __dir__(self):
-    return self.__dict__.keys() + dir(self._base_)
+    return list(self.__dict__.keys()) + dir(self._base_)
 
   # Just spit out the base as string
   def __str__(self):
@@ -342,16 +342,16 @@ class ProtoPool(object):
     return self._fields.get(normalize_type(field_name))
 
   def get_files(self):
-    return self._files.values()
+    return list(self._files.values())
 
   def get_messages(self):
-    return self._messages.values()
+    return list(self._messages.values())
 
   def get_enums(self):
-    return self._enums.values()
+    return list(self._enums.values())
 
   def get_fields(self):
-    return self._fields.values()
+    return list(self._fields.values())
 
 
 def normalize_type(type_name):

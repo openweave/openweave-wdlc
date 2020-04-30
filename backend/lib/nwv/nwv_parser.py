@@ -100,13 +100,16 @@ def _order_messages_by_dependency(messages, namespace):
   remaining_messages = collections.OrderedDict(
       (x.full_name, (x, _get_dependencies_in_namespace(x, namespace)))
       for x in messages)
-  while remaining_messages:
+  already_processed = set()
+  while len(remaining_messages) != len(already_processed):
     for nested_msg_desc, deps in remaining_messages.values():
+      if nested_msg_desc.full_name in already_processed:
+        continue
       for dep in deps:
-        if dep in remaining_messages:
+        if dep not in already_processed and dep in remaining_messages:
           break
       else:
-        del remaining_messages[nested_msg_desc.full_name]
+        already_processed.add(nested_msg_desc.full_name)
         yield nested_msg_desc
 
 
@@ -470,7 +473,7 @@ class Parser(object):
     typespace.version_map = schema.VersionMap(options.version_map)
 
     for nested_msg_desc in _order_messages_by_dependency(
-        typespace.desc.messages.values(), typespace.full_name):
+        list(typespace.desc.messages.values()), typespace.full_name):
       if nested_msg_desc.is_map_entry:
         continue  # ignore map entries
       nested_msg = self.get_obj(nested_msg_desc.full_name)
@@ -557,7 +560,7 @@ class Parser(object):
       trait.state_list.append(self.get_obj(field_desc.full_name))
 
     for nested_msg_desc in _order_messages_by_dependency(
-        trait.desc.messages.values(), trait.full_name):
+        list(trait.desc.messages.values()), trait.full_name):
       if nested_msg_desc.is_map_entry:
         continue  # ignore map entries
       nested_msg = self.get_obj(nested_msg_desc.full_name)
@@ -711,11 +714,9 @@ class Parser(object):
     for value in enum.desc.values.values():
       description = self.parse_comments(value)
       pair_opts = value.options.Extensions[wdl_options_pb2.enumvalue]
-
       value.full_name.replace(
-          inflection.underscore(enum.base_name).decode('utf-8').upper() + '_',
+          inflection.underscore(enum.base_name).upper() + '_',
           '')
-
       enum_pair = schema.EnumPair(value.full_name, value.number, description)
       enum_pair.source_file = enum.source_file
 
@@ -1004,7 +1005,7 @@ class Parser(object):
           'TRAIT': options.Extensions[wdl_options_pb2.trait].id,
           'EVENT': options.Extensions[wdl_options_pb2.event].id,
           'COMMAND': options.Extensions[wdl_options_pb2.command].id
-      }.get(typ, _unique_number.next())
+      }.get(typ, next(_unique_number))
     elif isinstance(desc, proto_pool.FieldDesc):
       parent_typ = wdl_options_pb2.MessageType.Name(
           desc.parent.options.Extensions[wdl_options_pb2.message_type])
@@ -1022,10 +1023,10 @@ class Parser(object):
         typ_cls = schema.ConstantGroup
       else:
         typ_cls = schema.Enum
-      obj_id = _unique_number.next()
+      obj_id = next(_unique_number)
     elif isinstance(desc, proto_pool.FileDesc):
       typ_cls = schema.File
-      obj_id = _unique_number.next()
+      obj_id = next(_unique_number)
 
     obj = typ_cls(desc.full_name, obj_id, comments)
     obj.desc = desc

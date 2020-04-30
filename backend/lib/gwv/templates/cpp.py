@@ -32,6 +32,7 @@ import inflection
 
 from gwv import schema
 from gwv.templates import c
+from six.moves import map
 
 
 class CodegenTemplate(c.CodegenTemplate):

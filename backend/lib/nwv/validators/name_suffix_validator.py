@@ -42,7 +42,7 @@ _SUFFIX_MAP = dict(
     # TODO(robbarnes) Resource, Event, Response (Event), UpdateParameters
 )
 
-_ALL_SUFFIXES = frozenset(itertools.chain(*_SUFFIX_MAP.values()))
+_ALL_SUFFIXES = frozenset(itertools.chain(*list(_SUFFIX_MAP.values())))
 
 # These violate the rules, but are allowed since they can't be changed anymore.
 _LEGACY_WHITELIST = frozenset([

@@ -144,7 +144,7 @@ NL_PATH_PROG(SED, sed, [sed is required to build wdlc])
 # version range, inclusive.
 
 nl_python_major_minor_version_min="2.7"
-nl_python_major_minor_version_max="2.7"
+nl_python_major_minor_version_max="3.8"
 
 # Provide some documentation in 'configure --help' that informs the
 # user that 'PYTHON=<python executable> configure' or 'configure
