@@ -32,6 +32,8 @@ import "google/protobuf/descriptor.proto";
 import "google/protobuf/any.proto";
 import "google/protobuf/duration.proto";
 import "google/protobuf/timestamp.proto";
+import public "storage/datapol/annotations/proto/semantic_annotations.proto";
+import public "storage/datapol/annotations/proto/retention_annotations.proto";
 import public "wdl/data_access.proto";
 import public "wdl/vendors.proto";
 import "weave/common/units.proto";
@@ -246,6 +248,14 @@ message WdlPropertyOptions {
   optional bool ephemeral = 51; // Ephemeral properties allow publishers to 'forget' the value of a property and depend on other caching re-publishers of this information
                                 // in the system to retain its previous value. This should be used sparingly (see specification).
                                 // Ephemeral properties are always nullable, so use nullability in conjunction with this.
+
+
+  // Advises downstream services on whether a field can be stored in a secondary
+  // storage or not. By default no fields should be stored (RT_OBSOLETE is the
+  // minimum retention applicable).
+  // Retention tags indicate the minimum desired retention for a field in a
+  // proto buffer. 
+  optional datapol.RetentionTag retention = 52 [default = RT_OBSOLETE];
 }
 
 /**
