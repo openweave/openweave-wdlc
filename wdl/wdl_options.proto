@@ -180,6 +180,8 @@ message WdlCommandOptions {
   // Implementation of `result_events` postponed pending use cases
   // repeated string result_events = 10;
   optional string completion_event = 11;
+
+  optional WdlPermission permission = 20;
 }
 
 message WdlEventOptions {
@@ -514,6 +516,9 @@ message WdlTraitOptions {
   optional uint32 reserved_command_tag_max = 11;
   optional uint32 reserved_event_tag_min = 12;
   optional uint32 reserved_event_tag_max = 13;
+
+  optional WdlPermission permission_read = 20;
+  optional WdlPermission permission_update = 21;
 }
 
 message WdlTypespaceOptions {
@@ -584,6 +589,10 @@ message WdlServiceOptions {
   optional string config = 1;
   optional WdlTraitOptions trait = 2;
   optional WdlResourceOptions resource = 3;
+}
+
+message WdlPermission {
+  optional string permission = 1;
 }
 
 // Options to configure the Caspian Pipeline.
