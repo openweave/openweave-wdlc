@@ -517,8 +517,8 @@ message WdlTraitOptions {
   optional uint32 reserved_event_tag_min = 12;
   optional uint32 reserved_event_tag_max = 13;
 
-  optional WdlPermission get_permission = 20;
-  optional WdlPermission update_permission = 21;
+  optional WdlPermission permission_read = 20;
+  optional WdlPermission permission_update = 21;
 }
 
 message WdlTypespaceOptions {
